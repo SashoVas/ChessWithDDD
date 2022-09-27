@@ -10,12 +10,12 @@ namespace Domain.Entities
         internal Board(Guid Id):base(Id)
         {
             Pieces = new List<Piece>();
-            Fen = "8/8/8/8/8/8/8/8";
+            Fen = DomainConstants.EmptyBoardFen;
         }
 
         internal Board(Guid Id, List<Piece> pieces) : base(Id)
         {
-            if (pieces.Count()>8*8)
+            if (pieces.Count() > DomainConstants.DefaultBoardRows * DomainConstants.DefaultBoardCols)
             {
                 throw new Exception("More pieces than squeres");
             }
@@ -48,7 +48,7 @@ namespace Domain.Entities
         }
         private Piece[,] ConstructBoard()
         {
-            Piece[,] board = new Piece[8,8];
+            Piece[,] board = new Piece[DomainConstants.DefaultBoardRows, DomainConstants.DefaultBoardCols];
             foreach (var piece in Pieces)
             {
                 if (piece.IsTaken)
@@ -88,7 +88,7 @@ namespace Domain.Entities
         {
             int currentRow = startPosition.Row + rowChange;
             int currentCol = startPosition.Col + colChange;
-            if (!(currentRow >= 8 || currentCol >= 8 || currentRow < 8 || currentCol < 8)
+            if (!(currentRow >= DomainConstants.DefaultBoardRows || currentCol >= DomainConstants.DefaultBoardCols || currentRow < DomainConstants.DefaultBoardRows || currentCol < DomainConstants.DefaultBoardCols)
                 ||(board[currentRow,currentCol] is not null && board[currentRow, currentCol].Color==color))
             {
                 return;
@@ -99,7 +99,7 @@ namespace Domain.Entities
         {
             currentRow += rowChange;
             currentCol += colChange;
-            while (currentRow < 8 || currentCol < 8 || currentRow >=0 || currentCol >= 0)
+            while (currentRow < DomainConstants.DefaultBoardRows || currentCol < DomainConstants.DefaultBoardCols || currentRow >=0 || currentCol >= 0)
             {
                 if (board[currentRow,currentCol] is not null)
                 {

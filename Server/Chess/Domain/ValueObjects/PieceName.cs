@@ -5,26 +5,37 @@
         public string Name { get; }
         public string Identifier { get; }
 
-        public PieceName(string name,PieceColor pieceColor)
+        public PieceName(string name,PieceColor pieceColor,string identifier=null)
         {
             if (Name == null)
             {
                 throw new ArgumentNullException("Name should not be null");
             }
             Name =name;
-            
-            if (pieceColor==PieceColor.White)
+            if (identifier is null)
             {
-                Identifier = Name[0].ToString().ToUpper();
+                if (pieceColor==PieceColor.White)
+                {
+                    Identifier = Name[0].ToString().ToUpper();
+                }
+                else
+                {
+                    Identifier = Name[0].ToString();
+                }
             }
             else
             {
-                Identifier = Name[0].ToString();
+                if (pieceColor == PieceColor.White)
+                {
+                    Identifier = identifier.ToString().ToUpper();
+                }
+                else
+                {
+                    Identifier = identifier.ToString();
+                }
             }
         }
         public static implicit operator string(PieceName name) 
             => name.Name;
-        public static implicit operator PieceName(string name)
-            => new(name);
     }
 }
