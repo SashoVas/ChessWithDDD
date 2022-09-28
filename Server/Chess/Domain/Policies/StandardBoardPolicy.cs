@@ -7,11 +7,8 @@ namespace Domain.Policies
 {
     internal sealed class StandardBoardPolicy
     {
-        private readonly IPieceFactory pieceFactory;
-        public StandardBoardPolicy(IPieceFactory pieceFactory) 
-            => this.pieceFactory = pieceFactory;
         public bool IsAplicable(FenIdentifier fen) => fen == DomainConstants.DefaultBoardStartPositionFen;
-        public IEnumerable<Piece> GenerateItems(FenIdentifier fen)
+        public IEnumerable<Piece> GenerateItems(IPieceFactory pieceFactory, FenIdentifier fen)
         {
             var pieces=new List<Piece>();
             var color =PieceColor.White;

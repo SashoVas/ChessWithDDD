@@ -3,9 +3,9 @@ using Domain.ValueObjects;
 
 namespace Domain.Factories
 {
-    public interface IBoardFactoriy
+    public interface IBoardFactory
     {
         Board CreateStandardBoard();
-        Board CreateCustomStandard(FenIdentifier fen);
+        Board CreateCustomStandard( FenIdentifier fen);
     }
 }

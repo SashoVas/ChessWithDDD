@@ -1,11 +1,12 @@
 ﻿using Domain.Entities;
+using Domain.Factories;
 using Domain.ValueObjects;
 
 namespace Domain.Policies
 {
-    public interface IBoardPolicy
+    internal interface IBoardPolicy
     {
         bool IsAplicable(FenIdentifier fen);
-        IEnumerable<Piece> GenerateItems(FenIdentifier fen);
+        IEnumerable<Piece> GenerateItems(IPieceFactory pieceFactory, FenIdentifier fen);
     }
 }

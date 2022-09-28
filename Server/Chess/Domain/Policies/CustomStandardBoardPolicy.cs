@@ -5,18 +5,11 @@ using Shared.Domain;
 
 namespace Domain.Policies
 {
-    public class CustomBoardPolicy : IBoardPolicy
+    internal sealed class CustomStandardBoardPolicy : IBoardPolicy
     {
-        private readonly IPieceFactory pieceFactory;
-
-        public CustomBoardPolicy(IPieceFactory pieceFactory)
-        {
-            this.pieceFactory = pieceFactory;
-        }
-
         public bool IsAplicable(FenIdentifier fen) 
             => fen != DomainConstants.DefaultBoardStartPositionFen;
-        public IEnumerable<Piece> GenerateItems(FenIdentifier fen)
+        public IEnumerable<Piece> GenerateItems(IPieceFactory pieceFactory, FenIdentifier fen)
         {
             var pieces=new List<Piece>();
             for (int i = 0; i < fen.Rows.Length; i++)
