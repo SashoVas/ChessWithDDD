@@ -7,7 +7,7 @@
 
         public PieceName(string name,PieceColor pieceColor,string identifier=null)
         {
-            if (Name == null)
+            if (name == null)
             {
                 throw new ArgumentNullException("Name should not be null");
             }

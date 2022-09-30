@@ -1,9 +1,10 @@
-﻿using Domain.ValueObjects;
+﻿using Domain.Events;
+using Domain.ValueObjects;
 using Shared.Domain;
 
 namespace Domain.Entities
 {
-    public sealed class Board : Entity
+    public sealed class Board : AggregateRoot
     {
         public List<Piece> Pieces { get;  }
         public FenIdentifier Fen { get;private set; }
@@ -22,27 +23,35 @@ namespace Domain.Entities
             Pieces = pieces;
             Fen = ConstructBoard();
         }
-        public void MakeAMove(Guid pieceId,PiecePosition move)
+        public void MakeAMove(PiecePosition startPosition,PiecePosition move)
         {
             var board = ConstructBoard();
-            var piece=Pieces.FirstOrDefault(p => p.Id == pieceId);
+            var piece = board[startPosition.Row, startPosition.Col];
+            if (piece is null)
+            {
+                throw new Exception("Start position should be a piece");
+            }
             if (board[move.Row,move.Col] is not null && board[move.Row, move.Col].Color==piece.Color)
             {
                 throw new Exception("There cannot be more then one pieces on a squere");
             }
             foreach (var movePatter in piece.Moves)
             {
-                if (GetAvelableMoves(piece.Position,board,movePatter.RowChange,movePatter.ColChange,movePatter.IsRepeatable,movePatter.SwapDirections,piece.Color)
+                var moves = GetAvelableMoves(piece.Position, board, movePatter.RowChange, movePatter.ColChange, movePatter.IsRepeatable, movePatter.SwapDirections, piece.Color);
+                if (moves
                     .Any(m=>m==move))
                 {
+                    Piece takenPiece = null;
                     if (board[move.Row, move.Col] is not null)
                     {
                         board[move.Row, move.Col].TakePiece();
+                        takenPiece = board[move.Row, move.Col];
                     }
-                    board[piece.Position.Row, piece.Position.Col] = null;
+                    board[startPosition.Row, startPosition.Col] = null;
                     board[move.Row, move.Col] = piece;
                     piece.MakeAMove(move);
                     Fen =board;
+                    AddEvent(new MakeAMoveBoardDomainEvent(piece,takenPiece, startPosition, move));
                 }
             }
         }
@@ -88,12 +97,12 @@ namespace Domain.Entities
         {
             int currentRow = startPosition.Row + rowChange;
             int currentCol = startPosition.Col + colChange;
-            if (!(currentRow >= DomainConstants.DefaultBoardRows || currentCol >= DomainConstants.DefaultBoardCols || currentRow < DomainConstants.DefaultBoardRows || currentCol < DomainConstants.DefaultBoardCols)
+            if (currentRow >= DomainConstants.DefaultBoardRows || currentCol >= DomainConstants.DefaultBoardCols || currentRow < 0 || currentCol <0
                 ||(board[currentRow,currentCol] is not null && board[currentRow, currentCol].Color==color))
             {
                 return;
             }
-            result.Append(new PiecePosition(currentRow, currentCol));
+            result.Add(new PiecePosition(currentRow, currentCol));
         }
         private void AddPositions(int currentRow, int currentCol, List<PiecePosition> result, int rowChange, int colChange, Piece[,] board, PieceColor color)
         {
@@ -105,7 +114,7 @@ namespace Domain.Entities
                 {
                     if (board[currentRow, currentCol].Color!=color)
                     {
-                        result.Append(new PiecePosition(currentRow, currentCol));
+                        result.Add(new PiecePosition(currentRow, currentCol));
                     }
                     break;
                 }
