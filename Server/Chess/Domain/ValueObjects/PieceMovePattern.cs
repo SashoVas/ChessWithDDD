@@ -6,7 +6,7 @@
         public bool SwapDirections { get; init; }
         public int RowChange { get; }
         public int ColChange { get; }
-        public PieceMovePattern(bool isRepeatable, bool swapDirections, int rowChange, int colChange)
+        public PieceMovePattern(bool isRepeatable, bool swapDirections, int rowChange, int colChange,PieceColor pieceColor)
         {
             if (rowChange >= 8||colChange>=6)
             {
@@ -18,6 +18,11 @@
             }
             IsRepeatable = isRepeatable;
             SwapDirections = swapDirections;
+            if (pieceColor==PieceColor.Black)
+            {
+                rowChange = -rowChange;
+                colChange = -colChange;
+            }
             RowChange = rowChange;
             ColChange = colChange;
         }

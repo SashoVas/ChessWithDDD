@@ -7,10 +7,8 @@
         protected AggregateRoot(Guid Id) : base(Id)
         {
         }
-        protected void AddEvent(IDomainEvent @event)
-        {
-            _events.Add(@event);
-        }
+        protected void AddEvent(IDomainEvent @event) 
+            => _events.Add(@event);
         public void ClearEvents()=>_events.Clear();
 
 

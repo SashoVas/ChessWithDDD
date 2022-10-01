@@ -8,13 +8,19 @@ namespace Domain.Entities
     {
         public List<Piece> Pieces { get;  }
         public FenIdentifier Fen { get;private set; }
-        internal Board(Guid Id):base(Id)
+        public Guid WhitePlayerId { get; set; }
+        public Guid BlackPlayerId { get; set; }
+        public bool IsWhiteOnTurn { get; set; }
+        internal Board(Guid Id,Guid whitePlayerId,Guid blackPlayerId):base(Id)
         {
             Pieces = new List<Piece>();
             Fen = DomainConstants.EmptyBoardFen;
+            IsWhiteOnTurn = true;
+            WhitePlayerId = whitePlayerId;
+            BlackPlayerId = blackPlayerId;
         }
 
-        internal Board(Guid Id, List<Piece> pieces) : base(Id)
+        internal Board(Guid Id, List<Piece> pieces, Guid whitePlayerId, Guid blackPlayerId) : base(Id)
         {
             if (pieces.Count() > DomainConstants.DefaultBoardRows * DomainConstants.DefaultBoardCols)
             {
@@ -22,9 +28,16 @@ namespace Domain.Entities
             }
             Pieces = pieces;
             Fen = ConstructBoard();
+            IsWhiteOnTurn = true;
+            WhitePlayerId = whitePlayerId;
+            BlackPlayerId = blackPlayerId;
         }
-        public void MakeAMove(PiecePosition startPosition,PiecePosition move)
+        public void MakeAMove(PiecePosition startPosition,PiecePosition move,Guid playerId)
         {
+            if ((IsWhiteOnTurn &&WhitePlayerId!=playerId)||(!IsWhiteOnTurn && BlackPlayerId!=playerId))
+            {
+                throw new Exception("This is not the player's turn");
+            }
             var board = ConstructBoard();
             var piece = board[startPosition.Row, startPosition.Col];
             if (piece is null)
@@ -54,6 +67,7 @@ namespace Domain.Entities
                     AddEvent(new MakeAMoveBoardDomainEvent(piece,takenPiece, startPosition, move));
                 }
             }
+            IsWhiteOnTurn = !IsWhiteOnTurn;
         }
         private Piece[,] ConstructBoard()
         {

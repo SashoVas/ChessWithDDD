@@ -11,19 +11,19 @@ namespace Domain.Factories
         public BoardFactory(IPieceFactory pieceFactory) 
             => this.pieceFactory = pieceFactory;
 
-        public Board CreateCustomStandard(FenIdentifier fen)
+        public Board CreateCustomStandard(FenIdentifier fen, Guid whitePlayerId, Guid blackPlayerId)
         {
             var policy = new CustomStandardBoardPolicy();
             var pieces = policy.GenerateItems(pieceFactory, fen);
-            var board = new Board(Guid.NewGuid(),pieces.ToList());
+            var board = new Board(Guid.NewGuid(),pieces.ToList(),whitePlayerId,blackPlayerId);
             return board;
         }
 
-        public Board CreateStandardBoard()
+        public Board CreateStandardBoard(Guid whitePlayerId, Guid blackPlayerId)
         {
             var policy = new StandardBoardPolicy();
             var pieces = policy.GenerateItems(pieceFactory, null);
-            var board = new Board(Guid.NewGuid(),pieces.ToList());
+            var board = new Board(Guid.NewGuid(),pieces.ToList(),whitePlayerId,blackPlayerId);
             return board;
         }
     }

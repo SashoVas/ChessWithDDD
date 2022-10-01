@@ -5,7 +5,7 @@ namespace Domain.Factories
 {
     public interface IBoardFactory
     {
-        Board CreateStandardBoard();
-        Board CreateCustomStandard( FenIdentifier fen);
+        Board CreateStandardBoard(Guid whitePlayerId,Guid blackPlayerId);
+        Board CreateCustomStandard( FenIdentifier fen, Guid whitePlayerId, Guid blackPlayerId);
     }
 }
