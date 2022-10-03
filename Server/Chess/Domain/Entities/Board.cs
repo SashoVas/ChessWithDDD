@@ -11,6 +11,7 @@ namespace Domain.Entities
         public Guid WhitePlayerId { get; set; }
         public Guid BlackPlayerId { get; set; }
         public bool IsWhiteOnTurn { get; set; }
+        private bool boardIsInCheck=false;
         internal Board(Guid Id,Guid whitePlayerId,Guid blackPlayerId):base(Id)
         {
             Pieces = new List<Piece>();
@@ -64,10 +65,37 @@ namespace Domain.Entities
                     board[move.Row, move.Col] = piece;
                     piece.MakeAMove(move);
                     Fen =board;
+                    boardIsInCheck = IsInCheck(piece);
                     AddEvent(new MakeAMoveBoardDomainEvent(piece,takenPiece, startPosition, move));
                 }
             }
             IsWhiteOnTurn = !IsWhiteOnTurn;
+        }
+        public void AddPiece(Piece piece)
+        {
+            if (Pieces.Any(p=>p.Position==piece.Position))
+            {
+                throw new Exception("There cannot be more then one pieces on a squere");
+            }
+            Pieces.Add(piece);
+            AddEvent(new AddPieceToBoardDomainEvent(piece));
+        }
+        public void AddPieces(List<Piece>pieces)
+        {
+            pieces.ForEach(p => AddPiece(p));
+        }
+        private bool IsInCheck(Piece piece)
+        {
+            var board = ConstructBoard();
+            foreach (var movePatter in piece.Moves)
+            {
+                var moves = GetAvelableMoves(piece.Position, board, movePatter.RowChange, movePatter.ColChange, movePatter.IsRepeatable, movePatter.SwapDirections, piece.Color);
+                if (moves.Any(m =>board[m.Row, m.Col]is not null && board[m.Row,m.Col].Name=="king"))
+                {
+                    return true;
+                }
+            }
+            return false;
         }
         private Piece[,] ConstructBoard()
         {

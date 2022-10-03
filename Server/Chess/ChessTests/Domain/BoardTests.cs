@@ -9,9 +9,14 @@ namespace ChessTests.Domain
     public class BoardTests
     {
         private readonly IBoardFactory boardFactory;
+        private readonly IPieceFactory pieceFactory;
 
-        public BoardTests() 
-            => this.boardFactory = new BoardFactory(new PieceFactory());
+        public BoardTests()
+        {
+            this.pieceFactory = new PieceFactory();
+            this.boardFactory = new BoardFactory(pieceFactory);
+        }
+
         private Board GetBoard(string fen,Guid whitePlayerId,Guid blackPlayerId)
         {
             return boardFactory.CreateCustomStandard(fen,whitePlayerId,blackPlayerId);
@@ -69,6 +74,53 @@ namespace ChessTests.Domain
             Assert.NotNull(@event);
             Assert.IsType<MakeAMoveBoardDomainEvent>(@event);
             Assert.Equal("pawn", ((MakeAMoveBoardDomainEvent)@event).TakenPiece.Name);
+        }
+        [Fact]
+        public void AddPieceShouldAddPieceToTheBoard()
+        {
+            var whitePlayerId = Guid.NewGuid();
+            var blackPlayerId = Guid.NewGuid();
+            var board = GetBoard("K7/1p6/8/8/8/8/8/8", whitePlayerId, blackPlayerId);
+            var piece = pieceFactory.CreateKnight(new PiecePosition(5, 5), PieceColor.White);
+            board.AddPiece(piece);
+
+            var @event = board.Events.First();
+            Assert.NotNull(@event);
+            Assert.IsType<AddPieceToBoardDomainEvent>(@event);
+            Assert.Equal(piece,((AddPieceToBoardDomainEvent)@event).Piece);
+
+        }
+        [Fact]
+        public void AddPieceShouldThrowAnExeptionWhenThereIsPieceOnTheSquare()
+        {
+            var whitePlayerId = Guid.NewGuid();
+            var blackPlayerId = Guid.NewGuid();
+            var board = GetBoard("K7/1p6/8/8/8/8/8/8", whitePlayerId, blackPlayerId);
+            var piece = pieceFactory.CreateKnight(new PiecePosition(1, 1), PieceColor.White);
+            
+            Assert.Throws<Exception>(()=>board.AddPiece(piece));
+        }
+        [Fact]
+        public void AddPiecesShouldAddMultiplePiecesToTheBoard()
+        {
+            var whitePlayerId = Guid.NewGuid();
+            var blackPlayerId = Guid.NewGuid();
+            var board = GetBoard("K7/1p6/8/8/8/8/8/8", whitePlayerId, blackPlayerId);
+            var piece1 = pieceFactory.CreateKnight(new PiecePosition(2, 2), PieceColor.White);
+            var piece2 = pieceFactory.CreateKnight(new PiecePosition(3, 3), PieceColor.White);
+            var piece3 = pieceFactory.CreateKnight(new PiecePosition(4, 4), PieceColor.White);
+            var piece4 = pieceFactory.CreateKnight(new PiecePosition(5, 5), PieceColor.White);
+            var list = new List<Piece> { piece1, piece2, piece3, piece4 };
+            board.AddPieces(list);
+
+            Assert.Equal(4,board.Events.Count());
+            int el = 0;
+            foreach (var e in board.Events)
+            {
+                Assert.IsType<AddPieceToBoardDomainEvent>(e);
+                Assert.Equal(list[el], ((AddPieceToBoardDomainEvent)e).Piece);
+                el++;
+            }
         }
     }
 }
