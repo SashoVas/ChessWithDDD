@@ -7,11 +7,10 @@ namespace Domain.Entities
     public sealed class Board : AggregateRoot
     {
         public List<Piece> Pieces { get;  }
-        public FenIdentifier Fen { get;private set; }
-        public Guid WhitePlayerId { get; set; }
-        public Guid BlackPlayerId { get; set; }
-        public bool IsWhiteOnTurn { get; set; }
-        private bool boardIsInCheck=false;
+        public FenIdentifier Fen { get; private set; }
+        public Guid WhitePlayerId { get; private init; }
+        public Guid BlackPlayerId { get; private init; }
+        public bool IsWhiteOnTurn { get; private set; }
         internal Board(Guid Id,Guid whitePlayerId,Guid blackPlayerId):base(Id)
         {
             Pieces = new List<Piece>();
@@ -65,10 +64,10 @@ namespace Domain.Entities
                     board[move.Row, move.Col] = piece;
                     piece.MakeAMove(move);
                     Fen =board;
-                    boardIsInCheck = IsInCheck(piece);
                     AddEvent(new MakeAMoveBoardDomainEvent(piece,takenPiece, startPosition, move));
                 }
             }
+            ValidateChecks(piece,board);
             IsWhiteOnTurn = !IsWhiteOnTurn;
         }
         public void AddPiece(Piece piece)
@@ -80,22 +79,37 @@ namespace Domain.Entities
             Pieces.Add(piece);
             AddEvent(new AddPieceToBoardDomainEvent(piece));
         }
-        public void AddPieces(List<Piece>pieces)
+        public void AddPieces(List<Piece> pieces) 
+            => pieces.ForEach(p => AddPiece(p));
+        private void ValidateChecks(Piece piece,Piece[,] board)
         {
-            pieces.ForEach(p => AddPiece(p));
+            foreach (var pieceToCheckForCheck in Pieces)
+            {
+                if (IsInCheck(pieceToCheckForCheck, board))
+                {
+                    if (pieceToCheckForCheck.Color != piece.Color)
+                    {
+                        throw new Exception("You are in check");
+                    }
+                }
+            }
         }
-        private bool IsInCheck(Piece piece)
+        private bool IsInCheck(Piece piece, Piece[,]board)
         {
-            var board = ConstructBoard();
             foreach (var movePatter in piece.Moves)
             {
                 var moves = GetAvelableMoves(piece.Position, board, movePatter.RowChange, movePatter.ColChange, movePatter.IsRepeatable, movePatter.SwapDirections, piece.Color);
-                if (moves.Any(m =>board[m.Row, m.Col]is not null && board[m.Row,m.Col].Name=="king"))
+                if (moves.Any(m =>board[m.Row, m.Col]is not null && board[m.Row,m.Col].Name=="king" && board[m.Row, m.Col].Color!=piece.Color))
                 {
                     return true;
                 }
+                
             }
             return false;
+        }
+        private bool IsInMate()
+        {
+            throw new NotImplementedException();
         }
         private Piece[,] ConstructBoard()
         {
