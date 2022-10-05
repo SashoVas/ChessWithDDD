@@ -83,18 +83,25 @@ namespace Domain.Entities
             => pieces.ForEach(p => AddPiece(p));
         private void ValidateChecks(Piece piece,Piece[,] board)
         {
+            bool playerInCheck = false;
+            bool[,] checkedPositions = new bool[DomainConstants.DefaultBoardRows, DomainConstants.DefaultBoardCols];
             foreach (var pieceToCheckForCheck in Pieces)
             {
-                if (IsInCheck(pieceToCheckForCheck, board))
+                if (IsInCheck(pieceToCheckForCheck, board, checkedPositions, piece.Color))
                 {
+                    playerInCheck = true;
                     if (pieceToCheckForCheck.Color != piece.Color)
                     {
                         throw new Exception("You are in check");
                     }
                 }
             }
+            if (playerInCheck && IsInMate(Pieces.FirstOrDefault(p=>p.Name=="king"&&p.Color!=piece.Color),checkedPositions,board))
+            {
+                throw new NotImplementedException();
+            }
         }
-        private bool IsInCheck(Piece piece, Piece[,]board)
+        private bool IsInCheck(Piece piece, Piece[,] board, bool[,] checkedPositions, PieceColor color)
         {
             foreach (var movePatter in piece.Moves)
             {
@@ -103,13 +110,25 @@ namespace Domain.Entities
                 {
                     return true;
                 }
-                
+                if (piece.Color!=color)
+                {
+                    moves.ForEach(m => checkedPositions[m.Row, m.Col] = true);
+                }
             }
             return false;
         }
-        private bool IsInMate()
+        private bool IsInMate(Piece king,bool[,] checkedPositions, Piece[,]board)
         {
-            throw new NotImplementedException();
+            foreach (var movePattern in king.Moves)
+            {
+                var moves = GetAvelableMoves(king.Position, board, movePattern.RowChange, movePattern.ColChange, movePattern.IsRepeatable, movePattern.SwapDirections, king.Color);
+                if (moves.Any(m => !checkedPositions[m.Row,m.Col]))
+                {
+                    return false;
+                }
+            }
+            
+            return true;
         }
         private Piece[,] ConstructBoard()
         {
