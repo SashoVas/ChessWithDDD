@@ -13,8 +13,10 @@ namespace ChessTests.Domain
 
         public BoardTests()
         {
-            this.pieceFactory = new PieceFactory();
-            this.boardFactory = new BoardFactory(pieceFactory);
+            
+            pieceFactory = new PieceFactory();
+            
+            boardFactory = new BoardFactory(pieceFactory);
         }
 
         private Board GetBoard(string fen,Guid whitePlayerId,Guid blackPlayerId)
@@ -27,7 +29,7 @@ namespace ChessTests.Domain
         {
             var whitePlayerId = Guid.NewGuid();
             var blackPlayerId = Guid.NewGuid();
-            var board = GetBoard("K7/8/8/8/8/8/8/8",whitePlayerId,blackPlayerId);
+            var board = GetBoard("K7/8/8/8/8/8/8/k7", whitePlayerId,blackPlayerId);
             board.MakeAMove(new PiecePosition(0,0),new PiecePosition(1,1),whitePlayerId);
 
             var @event=board.Events.First();
@@ -41,7 +43,7 @@ namespace ChessTests.Domain
         {
             var whitePlayerId = Guid.NewGuid();
             var blackPlayerId = Guid.NewGuid();
-            var board = GetBoard("K7/1p6/8/8/8/8/8/8", whitePlayerId, blackPlayerId);
+            var board = GetBoard("K7/1p6/8/8/8/8/8/k7", whitePlayerId, blackPlayerId);
             board.MakeAMove(new PiecePosition(0, 0), new PiecePosition(1, 0), whitePlayerId);
 
             var @event = board.Events.First();
@@ -66,7 +68,7 @@ namespace ChessTests.Domain
         {
             var whitePlayerId = Guid.NewGuid();
             var blackPlayerId = Guid.NewGuid();
-            var board = GetBoard("K7/1p6/8/8/8/8/8/8", whitePlayerId, blackPlayerId);
+            var board = GetBoard("K7/1p6/8/8/8/8/8/k7", whitePlayerId, blackPlayerId);
             board.MakeAMove(new PiecePosition(0, 0), new PiecePosition(1, 1), whitePlayerId);
 
             var @event = board.Events.First();
@@ -80,7 +82,7 @@ namespace ChessTests.Domain
         {
             var whitePlayerId = Guid.NewGuid();
             var blackPlayerId = Guid.NewGuid();
-            var board = GetBoard("K7/1p6/8/8/8/8/8/8", whitePlayerId, blackPlayerId);
+            var board = GetBoard("K7/1p6/8/8/8/8/8/k7", whitePlayerId, blackPlayerId);
             var piece = pieceFactory.CreateKnight(new PiecePosition(5, 5), PieceColor.White);
             board.AddPiece(piece);
 
@@ -95,7 +97,7 @@ namespace ChessTests.Domain
         {
             var whitePlayerId = Guid.NewGuid();
             var blackPlayerId = Guid.NewGuid();
-            var board = GetBoard("K7/1p6/8/8/8/8/8/8", whitePlayerId, blackPlayerId);
+            var board = GetBoard("K7/1p6/8/8/8/8/8/k7", whitePlayerId, blackPlayerId);
             var piece = pieceFactory.CreateKnight(new PiecePosition(1, 1), PieceColor.White);
             
             Assert.Throws<Exception>(()=>board.AddPiece(piece));
@@ -105,7 +107,7 @@ namespace ChessTests.Domain
         {
             var whitePlayerId = Guid.NewGuid();
             var blackPlayerId = Guid.NewGuid();
-            var board = GetBoard("K7/1p6/8/8/8/8/8/8", whitePlayerId, blackPlayerId);
+            var board = GetBoard("K7/1p6/8/8/8/8/8/k7", whitePlayerId, blackPlayerId);
             var piece1 = pieceFactory.CreateKnight(new PiecePosition(2, 2), PieceColor.White);
             var piece2 = pieceFactory.CreateKnight(new PiecePosition(3, 3), PieceColor.White);
             var piece3 = pieceFactory.CreateKnight(new PiecePosition(4, 4), PieceColor.White);
@@ -121,6 +123,16 @@ namespace ChessTests.Domain
                 Assert.Equal(list[el], ((AddPieceToBoardDomainEvent)e).Piece);
                 el++;
             }
+        }
+        [Fact]
+        public void MakeAMoveShouldThrowCheckMateException()
+        {
+            var whitePlayerId = Guid.NewGuid();
+            var blackPlayerId = Guid.NewGuid();
+            var board = GetBoard("kb6/p7/8/1B6/8/8/8/K7", whitePlayerId, blackPlayerId);
+
+            Assert.Throws<NotImplementedException>(()=>board.MakeAMove(new PiecePosition(3, 1), new PiecePosition(2, 2), whitePlayerId));
+            
         }
     }
 }

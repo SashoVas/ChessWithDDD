@@ -50,7 +50,7 @@ namespace Domain.Entities
             }
             foreach (var movePatter in piece.Moves)
             {
-                var moves = GetAvelableMoves(piece.Position, board, movePatter.RowChange, movePatter.ColChange, movePatter.IsRepeatable, movePatter.SwapDirections, piece.Color);
+                var moves = GetAvelableMoves(piece.Position, board, movePatter.RowChange, movePatter.ColChange, movePatter.IsRepeatable, movePatter.SwapDirections, piece.Color,move);
                 if (moves
                     .Any(m=>m==move))
                 {
@@ -85,49 +85,78 @@ namespace Domain.Entities
         {
             bool playerInCheck = false;
             bool[,] checkedPositions = new bool[DomainConstants.DefaultBoardRows, DomainConstants.DefaultBoardCols];
+            var listOfMovesThatPutTheEnemyInCheck = new List<HashSet<PiecePosition>>();
+            Piece whiteKing = Pieces.First(p=>p.Name=="king"&&p.Color==PieceColor.White);
+            Piece blackKing = Pieces.First(p=>p.Name=="king"&&p.Color==PieceColor.Black);
             foreach (var pieceToCheckForCheck in Pieces)
             {
-                if (IsInCheck(pieceToCheckForCheck, board, checkedPositions, piece.Color))
+                var moves = GetCheckedPositions(pieceToCheckForCheck, board, checkedPositions, piece.Color, pieceToCheckForCheck.Color!=PieceColor.White?whiteKing.Position:blackKing.Position);
+                if (moves.Count()>0)
                 {
                     playerInCheck = true;
                     if (pieceToCheckForCheck.Color != piece.Color)
                     {
                         throw new Exception("You are in check");
                     }
+                    listOfMovesThatPutTheEnemyInCheck.Add(moves);
                 }
             }
-            if (playerInCheck && IsInMate(Pieces.FirstOrDefault(p=>p.Name=="king"&&p.Color!=piece.Color),checkedPositions,board))
+            if (playerInCheck && IsInMate(piece.Color==PieceColor.White?blackKing:whiteKing,checkedPositions,board,listOfMovesThatPutTheEnemyInCheck))
             {
                 throw new NotImplementedException();
             }
         }
-        private bool IsInCheck(Piece piece, Piece[,] board, bool[,] checkedPositions, PieceColor color)
+        private HashSet<PiecePosition> GetCheckedPositions(Piece piece, Piece[,] board, bool[,] checkedPositions, PieceColor color,PiecePosition target)
         {
             foreach (var movePatter in piece.Moves)
             {
-                var moves = GetAvelableMoves(piece.Position, board, movePatter.RowChange, movePatter.ColChange, movePatter.IsRepeatable, movePatter.SwapDirections, piece.Color);
+                var moves = GetAvelableMoves(piece.Position, board, movePatter.RowChange, movePatter.ColChange, movePatter.IsRepeatable, movePatter.SwapDirections, piece.Color,target);
                 if (moves.Any(m =>board[m.Row, m.Col]is not null && board[m.Row,m.Col].Name=="king" && board[m.Row, m.Col].Color!=piece.Color))
                 {
-                    return true;
+                    return moves.ToHashSet();
                 }
                 if (piece.Color!=color)
                 {
                     moves.ForEach(m => checkedPositions[m.Row, m.Col] = true);
                 }
             }
-            return false;
+            return new HashSet<PiecePosition>();
         }
-        private bool IsInMate(Piece king,bool[,] checkedPositions, Piece[,]board)
+        private bool IsInMate(Piece king,bool[,] checkedPositions, Piece[,]board, List<HashSet<PiecePosition>> listOfMovesThatPutTheEnemyInCheck)
         {
-            foreach (var movePattern in king.Moves)
+            //foreach (var movePattern in king.Moves)
+            //{
+            //    var moves = GetAvelableMoves(king.Position, board, movePattern.RowChange, movePattern.ColChange, movePattern.IsRepeatable, movePattern.SwapDirections, king.Color,king.Position);
+            //    if (moves.Any(m => !checkedPositions[m.Row,m.Col]))
+            //    {
+            //        return false;
+            //    }
+            //}
+            foreach (var piece in Pieces)
             {
-                var moves = GetAvelableMoves(king.Position, board, movePattern.RowChange, movePattern.ColChange, movePattern.IsRepeatable, movePattern.SwapDirections, king.Color);
-                if (moves.Any(m => !checkedPositions[m.Row,m.Col]))
+                if (piece.Color!=king.Color)
                 {
-                    return false;
+                    continue;
+                }
+                foreach (var movePattern in piece.Moves)
+                {
+                    var moves = GetAvelableMoves(piece.Position, board, movePattern.RowChange, movePattern.ColChange, movePattern.IsRepeatable, movePattern.SwapDirections, piece.Color,king.Position);
+                    foreach (var move in moves)
+                    {
+                        int index = 0;
+                        var currentCheck = listOfMovesThatPutTheEnemyInCheck[index];
+                        while (currentCheck.Contains(move))
+                        {
+                            index++;
+                            if (index>= listOfMovesThatPutTheEnemyInCheck.Count())
+                            {
+                                return false;
+                            }
+                            currentCheck = listOfMovesThatPutTheEnemyInCheck[index];
+                        }
+                    }
                 }
             }
-            
             return true;
         }
         private Piece[,] ConstructBoard()
@@ -143,59 +172,120 @@ namespace Domain.Entities
             }
             return board;
         }
-        private List<PiecePosition> GetAvelableMoves(PiecePosition startPosition, Piece[,] board, int rowChange, int colChange, bool IsRepeatable, bool SwapDirections,PieceColor color)
+        private List<PiecePosition> GetAvelableMoves(PiecePosition startPosition,
+            Piece[,] board,
+            int rowChange,
+            int colChange,
+            bool IsRepeatable,
+            bool SwapDirections,
+            PieceColor color,
+            PiecePosition target)
         {
-            List<PiecePosition> result = new List<PiecePosition>();
+            var result = new List<PiecePosition>();
             if (IsRepeatable)
             {
                 if (SwapDirections)
                 {
-                    AddPositions(startPosition.Row, startPosition.Col, result, -rowChange, colChange, board, color);
-                    AddPositions(startPosition.Row, startPosition.Col, result, rowChange, -colChange, board, color);
-                    AddPositions(startPosition.Row, startPosition.Col, result, -rowChange, -colChange, board, color);
+                    if (AddPositions(startPosition.Row, startPosition.Col, -rowChange, colChange, board, color, target, result))
+                    {
+                        return result;
+                    }
+                    result.Clear();
+                    if (AddPositions(startPosition.Row, startPosition.Col, rowChange, -colChange, board, color, target, result))
+                    {
+                        return result;
+                    }
+                    result.Clear();
+                    if (AddPositions(startPosition.Row, startPosition.Col, -rowChange, -colChange, board, color, target, result))
+                    {
+                        return result;
+                    }
+                    result.Clear();
+                    AddPositions(startPosition.Row, startPosition.Col, -rowChange, -colChange, board, color, target, result);
                 }
-                AddPositions(startPosition.Row, startPosition.Col, result, rowChange, colChange, board, color);
+                if (AddPositions(startPosition.Row, startPosition.Col, rowChange, colChange, board, color, target, result))
+                {
+                    return result;
+                }
+                result.Clear();
             }
             else
             {
                 if (SwapDirections)
                 {
-                    AddPosition(startPosition, result, -rowChange, colChange, board,color);
-                    AddPosition(startPosition, result, rowChange, -colChange, board,color);
-                    AddPosition(startPosition, result, -rowChange, -colChange, board,color);
+                    if (AddPosition(startPosition, -rowChange, colChange, board, color, target, result))
+                    {
+                        return result;
+                    }
+                    result.Clear();
+                    if (AddPosition(startPosition, rowChange, -colChange, board, color, target, result))
+                    {
+                        return result;
+                    }
+                    result.Clear();
+                    if (AddPosition(startPosition, -rowChange, -colChange, board, color, target, result))
+                    {
+                        return result;
+                    }
+                    result.Clear();
                 }
-                AddPosition(startPosition, result, rowChange, colChange, board, color);
+                if (AddPosition(startPosition, rowChange, colChange, board, color, target, result))
+                {
+                    return result;
+                }
+                result.Clear();
             }
             return result;
         }
-        private void AddPosition(PiecePosition startPosition, List<PiecePosition> result, int rowChange, int colChange, Piece[,] board, PieceColor color)
+        private bool AddPosition(PiecePosition startPosition, int rowChange, int colChange, Piece[,] board, PieceColor color,PiecePosition target, List<PiecePosition>result)
         {
             int currentRow = startPosition.Row + rowChange;
             int currentCol = startPosition.Col + colChange;
             if (currentRow >= DomainConstants.DefaultBoardRows || currentCol >= DomainConstants.DefaultBoardCols || currentRow < 0 || currentCol <0
                 ||(board[currentRow,currentCol] is not null && board[currentRow, currentCol].Color==color))
             {
-                return;
+                return false;
             }
-            result.Add(new PiecePosition(currentRow, currentCol));
+            if (currentRow==target.Row &&currentCol==target.Col)
+            {
+                result.Add( new PiecePosition(currentRow, currentCol));
+                return true;
+            }
+            return false;
         }
-        private void AddPositions(int currentRow, int currentCol, List<PiecePosition> result, int rowChange, int colChange, Piece[,] board, PieceColor color)
+        private bool AddPositions(int currentRow, int currentCol, int rowChange, int colChange, Piece[,] board, PieceColor color,PiecePosition target, List<PiecePosition>result)
         {
+            
             currentRow += rowChange;
             currentCol += colChange;
-            while (currentRow < DomainConstants.DefaultBoardRows || currentCol < DomainConstants.DefaultBoardCols || currentRow >=0 || currentCol >= 0)
+            while (currentRow < DomainConstants.DefaultBoardRows && currentCol < DomainConstants.DefaultBoardCols && currentRow >=0 && currentCol >= 0)
             {
+                
                 if (board[currentRow,currentCol] is not null)
                 {
+                    
                     if (board[currentRow, currentCol].Color!=color)
                     {
                         result.Add(new PiecePosition(currentRow, currentCol));
                     }
+                    if (currentRow == target.Row && currentCol == target.Col)
+                    {
+                        return true;
+                    }
                     break;
+                }
+                else
+                {
+                    result.Add(new PiecePosition(currentRow, currentCol));
+                }
+                if (currentRow==target.Row && currentCol==target.Col)
+                {
+                    return true;
                 }
                 currentRow += rowChange;
                 currentCol += colChange;
             }
+            return false;
         }
     }
 }
