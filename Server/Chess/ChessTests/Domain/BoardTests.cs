@@ -132,7 +132,38 @@ namespace ChessTests.Domain
             var board = GetBoard("kb6/p7/8/1B6/8/8/8/K7", whitePlayerId, blackPlayerId);
 
             Assert.Throws<NotImplementedException>(()=>board.MakeAMove(new PiecePosition(3, 1), new PiecePosition(2, 2), whitePlayerId));
-            
+        }
+        [Fact]
+        public void MakeAMoveShouldPutThePlayerInCheckButNotInMateWithAvelableRookMove()
+        {
+            var whitePlayerId = Guid.NewGuid();
+            var blackPlayerId = Guid.NewGuid();
+            var board = GetBoard("kr6/p7/8/1B6/8/8/8/K7", whitePlayerId, blackPlayerId);
+            board.MakeAMove(new PiecePosition(3, 1), new PiecePosition(2, 2), whitePlayerId);
+
+            var @event = board.Events.First();
+
+            Assert.NotNull(@event);
+            Assert.IsType<MakeAMoveBoardDomainEvent>(@event);
+            Assert.Equal("bishop", ((MakeAMoveBoardDomainEvent)@event).MovedPiece.Name.Name);
+            Assert.Null(((MakeAMoveBoardDomainEvent)@event).TakenPiece);
+
+        }
+        [Fact]
+        public void MakeAMoveShouldPutThePlayerInCheckButNotInMateWithAvelableKingMove()
+        {
+            var whitePlayerId = Guid.NewGuid();
+            var blackPlayerId = Guid.NewGuid();
+            var board = GetBoard("k7/p7/8/1B6/8/8/8/K7", whitePlayerId, blackPlayerId);
+            board.MakeAMove(new PiecePosition(3, 1), new PiecePosition(2, 2), whitePlayerId);
+
+            var @event = board.Events.First();
+
+            Assert.NotNull(@event);
+            Assert.IsType<MakeAMoveBoardDomainEvent>(@event);
+            Assert.Equal("bishop", ((MakeAMoveBoardDomainEvent)@event).MovedPiece.Name.Name);
+            Assert.Null(((MakeAMoveBoardDomainEvent)@event).TakenPiece);
+
         }
     }
 }

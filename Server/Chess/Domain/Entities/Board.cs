@@ -50,7 +50,7 @@ namespace Domain.Entities
             }
             foreach (var movePatter in piece.Moves)
             {
-                var moves = GetAvelableMoves(piece.Position, board, movePatter.RowChange, movePatter.ColChange, movePatter.IsRepeatable, movePatter.SwapDirections, piece.Color,move);
+                var moves = GetAvelableMovesThatLeadToATarget(piece.Position, board, movePatter.RowChange, movePatter.ColChange, movePatter.IsRepeatable, movePatter.SwapDirections, piece.Color,move);
                 if (moves
                     .Any(m=>m==move))
                 {
@@ -90,7 +90,7 @@ namespace Domain.Entities
             Piece blackKing = Pieces.First(p=>p.Name=="king"&&p.Color==PieceColor.Black);
             foreach (var pieceToCheckForCheck in Pieces)
             {
-                var moves = GetCheckedPositions(pieceToCheckForCheck, board, checkedPositions, piece.Color, pieceToCheckForCheck.Color!=PieceColor.White?whiteKing.Position:blackKing.Position);
+                var moves = GetCheckedPositions(pieceToCheckForCheck, board, checkedPositions, pieceToCheckForCheck.Color, pieceToCheckForCheck.Color!=PieceColor.White?whiteKing.Position:blackKing.Position);
                 if (moves.Count()>0)
                 {
                     playerInCheck = true;
@@ -110,12 +110,16 @@ namespace Domain.Entities
         {
             foreach (var movePatter in piece.Moves)
             {
-                var moves = GetAvelableMoves(piece.Position, board, movePatter.RowChange, movePatter.ColChange, movePatter.IsRepeatable, movePatter.SwapDirections, piece.Color,target);
+                var moves = GetAvelableMovesThatLeadToATarget(piece.Position, board, movePatter.RowChange, movePatter.ColChange, movePatter.IsRepeatable, movePatter.SwapDirections, piece.Color,target);
                 if (moves.Any(m =>board[m.Row, m.Col]is not null && board[m.Row,m.Col].Name=="king" && board[m.Row, m.Col].Color!=piece.Color))
                 {
+                    if (piece.Color == color)
+                    {
+                        moves.ForEach(m => checkedPositions[m.Row, m.Col] = true);
+                    }
                     return moves.ToHashSet();
                 }
-                if (piece.Color!=color)
+                if (piece.Color==color)
                 {
                     moves.ForEach(m => checkedPositions[m.Row, m.Col] = true);
                 }
@@ -124,23 +128,23 @@ namespace Domain.Entities
         }
         private bool IsInMate(Piece king,bool[,] checkedPositions, Piece[,]board, List<HashSet<PiecePosition>> listOfMovesThatPutTheEnemyInCheck)
         {
-            //foreach (var movePattern in king.Moves)
-            //{
-            //    var moves = GetAvelableMoves(king.Position, board, movePattern.RowChange, movePattern.ColChange, movePattern.IsRepeatable, movePattern.SwapDirections, king.Color,king.Position);
-            //    if (moves.Any(m => !checkedPositions[m.Row,m.Col]))
-            //    {
-            //        return false;
-            //    }
-            //}
+            foreach (var movePattern in king.Moves)
+            {
+                var moves = GetAvelableMoves(king.Position, board, movePattern.RowChange, movePattern.ColChange, movePattern.IsRepeatable, movePattern.SwapDirections, king.Color);
+                if (moves.Any(m => !checkedPositions[m.Row,m.Col]))
+                {
+                    return false;
+                }
+            }
             foreach (var piece in Pieces)
             {
-                if (piece.Color!=king.Color)
+                if (piece.Color!=king.Color || piece.Name.Name=="king")
                 {
                     continue;
                 }
                 foreach (var movePattern in piece.Moves)
                 {
-                    var moves = GetAvelableMoves(piece.Position, board, movePattern.RowChange, movePattern.ColChange, movePattern.IsRepeatable, movePattern.SwapDirections, piece.Color,king.Position);
+                    var moves = GetAvelableMoves(piece.Position, board, movePattern.RowChange, movePattern.ColChange, movePattern.IsRepeatable, movePattern.SwapDirections, piece.Color);
                     foreach (var move in moves)
                     {
                         int index = 0;
@@ -172,7 +176,7 @@ namespace Domain.Entities
             }
             return board;
         }
-        private List<PiecePosition> GetAvelableMoves(PiecePosition startPosition,
+        private List<PiecePosition> GetAvelableMovesThatLeadToATarget(PiecePosition startPosition,
             Piece[,] board,
             int rowChange,
             int colChange,
@@ -201,7 +205,6 @@ namespace Domain.Entities
                         return result;
                     }
                     result.Clear();
-                    AddPositions(startPosition.Row, startPosition.Col, -rowChange, -colChange, board, color, target, result);
                 }
                 if (AddPositions(startPosition.Row, startPosition.Col, rowChange, colChange, board, color, target, result))
                 {
@@ -237,6 +240,37 @@ namespace Domain.Entities
             }
             return result;
         }
+        private List<PiecePosition> GetAvelableMoves(PiecePosition startPosition,
+            Piece[,] board,
+            int rowChange,
+            int colChange,
+            bool IsRepeatable,
+            bool SwapDirections,
+            PieceColor color)
+        {
+            var result = new List<PiecePosition>();
+            if (IsRepeatable)
+            {
+                if (SwapDirections)
+                {
+                    AddPositions(startPosition.Row, startPosition.Col, -rowChange, colChange, board, color, null, result);
+                    AddPositions(startPosition.Row, startPosition.Col, rowChange, -colChange, board, color, null, result);
+                    AddPositions(startPosition.Row, startPosition.Col, -rowChange, -colChange, board, color, null, result);
+                }
+                AddPositions(startPosition.Row, startPosition.Col, rowChange, colChange, board, color, null, result);
+            }
+            else
+            {
+                if (SwapDirections)
+                {
+                    AddPosition(startPosition, -rowChange, colChange, board, color, null, result);
+                    AddPosition(startPosition, rowChange, -colChange, board, color, null, result);
+                    AddPosition(startPosition, -rowChange, -colChange, board, color, null, result);
+                }
+                AddPosition(startPosition, rowChange, colChange, board, color, null, result);
+            }
+            return result;
+        }
         private bool AddPosition(PiecePosition startPosition, int rowChange, int colChange, Piece[,] board, PieceColor color,PiecePosition target, List<PiecePosition>result)
         {
             int currentRow = startPosition.Row + rowChange;
@@ -246,9 +280,9 @@ namespace Domain.Entities
             {
                 return false;
             }
-            if (currentRow==target.Row &&currentCol==target.Col)
+            result.Add( new PiecePosition(currentRow, currentCol));
+            if (target is not null && currentRow==target.Row &&currentCol==target.Col)
             {
-                result.Add( new PiecePosition(currentRow, currentCol));
                 return true;
             }
             return false;
@@ -268,7 +302,7 @@ namespace Domain.Entities
                     {
                         result.Add(new PiecePosition(currentRow, currentCol));
                     }
-                    if (currentRow == target.Row && currentCol == target.Col)
+                    if (target is not null && currentRow == target.Row && currentCol == target.Col)
                     {
                         return true;
                     }
@@ -278,7 +312,7 @@ namespace Domain.Entities
                 {
                     result.Add(new PiecePosition(currentRow, currentCol));
                 }
-                if (currentRow==target.Row && currentCol==target.Col)
+                if (target is not null && currentRow==target.Row && currentCol==target.Col)
                 {
                     return true;
                 }
