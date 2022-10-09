@@ -1,4 +1,5 @@
 ﻿using Domain.Entities;
+using Domain.Exceptions;
 
 namespace Domain.ValueObjects
 {
@@ -9,7 +10,7 @@ namespace Domain.ValueObjects
         {
             if (rows.Length!=8)
             {
-                throw new Exception("Infvalid board fen");
+                throw new InvalidLengthForAFenException();
             }
             Rows=rows;
         }

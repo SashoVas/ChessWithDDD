@@ -1,4 +1,6 @@
-﻿namespace Domain.ValueObjects
+﻿using Domain.Exceptions;
+
+namespace Domain.ValueObjects
 {
     public record PiecePosition
     {
@@ -8,7 +10,7 @@
         {
             if (row >= 8 || col >= 8 || row < 0 || col < 0)
             {
-                throw new Exception("Invalid position");
+                throw new InvalidPositionParametersException(row,col);
             }
             Row = row;
             Col = col;

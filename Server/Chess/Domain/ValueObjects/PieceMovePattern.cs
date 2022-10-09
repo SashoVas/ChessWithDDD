@@ -1,4 +1,6 @@
-﻿namespace Domain.ValueObjects
+﻿using Domain.Exceptions;
+
+namespace Domain.ValueObjects
 {
     public record PieceMovePattern
     {
@@ -10,11 +12,11 @@
         {
             if (rowChange >= 8||colChange>=6)
             {
-                throw new Exception("Invalid move parameters");
+                throw new InvalidValuesForAMoveException(rowChange,colChange);
             }
             if(rowChange == 0 && colChange == 0)
             {
-                throw new Exception("Invalid move parameters");
+                throw new InvalidValuesForAMoveException(rowChange,colChange);
             }
             IsRepeatable = isRepeatable;
             SwapDirections = swapDirections;

@@ -1,4 +1,5 @@
 ﻿using Domain.Events;
+using Domain.Exceptions;
 using Domain.ValueObjects;
 using Shared.Domain;
 
@@ -24,7 +25,7 @@ namespace Domain.Entities
         {
             if (pieces.Count() > DomainConstants.DefaultBoardRows * DomainConstants.DefaultBoardCols)
             {
-                throw new Exception("More pieces than squeres");
+                throw new TooManyPiecesException(null);
             }
             Pieces = pieces;
             Fen = ConstructBoard();
@@ -36,17 +37,17 @@ namespace Domain.Entities
         {
             if ((IsWhiteOnTurn &&WhitePlayerId!=playerId)||(!IsWhiteOnTurn && BlackPlayerId!=playerId))
             {
-                throw new Exception("This is not the player's turn");
+                throw new WrongTurnException();
             }
             var board = ConstructBoard();
             var piece = board[startPosition.Row, startPosition.Col];
             if (piece is null)
             {
-                throw new Exception("Start position should be a piece");
+                throw new PositionShouldBeAPieceException(startPosition);
             }
             if (board[move.Row,move.Col] is not null && board[move.Row, move.Col].Color==piece.Color)
             {
-                throw new Exception("There cannot be more then one pieces on a squere");
+                throw new TooManyPiecesException(move);
             }
             foreach (var movePatter in piece.Moves)
             {
@@ -74,7 +75,7 @@ namespace Domain.Entities
         {
             if (Pieces.Any(p=>p.Position==piece.Position))
             {
-                throw new Exception("There cannot be more then one pieces on a squere");
+                throw new TooManyPiecesException(piece.Position);
             }
             Pieces.Add(piece);
             AddEvent(new AddPieceToBoardDomainEvent(piece));
@@ -96,7 +97,7 @@ namespace Domain.Entities
                     playerInCheck = true;
                     if (pieceToCheckForCheck.Color != piece.Color)
                     {
-                        throw new Exception("You are in check");
+                        throw new InvalidMoveWhenCheckedException();
                     }
                     listOfMovesThatPutTheEnemyInCheck.Add(moves);
                 }

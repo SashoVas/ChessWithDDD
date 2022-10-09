@@ -1,4 +1,5 @@
-﻿using Domain.ValueObjects;
+﻿using Domain.Exceptions;
+using Domain.ValueObjects;
 using Shared.Domain;
 
 namespace Domain.Entities
@@ -14,7 +15,7 @@ namespace Domain.Entities
         {
             if (moves.Length==0)
             {
-                throw new Exception("Invalid moves for a piece");
+                throw new InvalidMovesForAPiece() ;
             }
             Name = name;
             Position = position;

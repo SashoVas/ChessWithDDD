@@ -1,5 +1,6 @@
 ﻿using Domain.Entities;
 using Domain.Events;
+using Domain.Exceptions;
 using Domain.Factories;
 using Domain.ValueObjects;
 using Xunit;
@@ -100,7 +101,7 @@ namespace ChessTests.Domain
             var board = GetBoard("K7/1p6/8/8/8/8/8/k7", whitePlayerId, blackPlayerId);
             var piece = pieceFactory.CreateKnight(new PiecePosition(1, 1), PieceColor.White);
             
-            Assert.Throws<Exception>(()=>board.AddPiece(piece));
+            Assert.Throws<TooManyPiecesException>(()=>board.AddPiece(piece));
         }
         [Fact]
         public void AddPiecesShouldAddMultiplePiecesToTheBoard()
