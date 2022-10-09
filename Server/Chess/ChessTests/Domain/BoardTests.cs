@@ -14,9 +14,7 @@ namespace ChessTests.Domain
 
         public BoardTests()
         {
-            
             pieceFactory = new PieceFactory();
-            
             boardFactory = new BoardFactory(pieceFactory);
         }
 
@@ -38,6 +36,46 @@ namespace ChessTests.Domain
             Assert.NotNull(@event);
             Assert.IsType<MakeAMoveBoardDomainEvent>(@event);
             Assert.Null(((MakeAMoveBoardDomainEvent)@event).TakenPiece);
+        }
+        [Fact]
+        public void MakeAMoveTestShouldThrowExceptionWhenOnTheDestinationIsAPieceFromSameColor()
+        {
+            var whitePlayerId = Guid.NewGuid();
+            var blackPlayerId = Guid.NewGuid();
+            var board = GetBoard("K7/1P6/8/8/8/8/8/k7", whitePlayerId, blackPlayerId);
+            Assert.Throws<TooManyPiecesException>(() =>board.MakeAMove(new PiecePosition(0, 0), new PiecePosition(1, 1), whitePlayerId));
+        }
+        [Fact]
+        public void MakeAMoveTestShouldThrowExceptionWhenThereIsNoPieceToMove()
+        {
+            var whitePlayerId = Guid.NewGuid();
+            var blackPlayerId = Guid.NewGuid();
+            var board = GetBoard("K7/1P6/8/8/8/8/8/k7", whitePlayerId, blackPlayerId);
+            Assert.Throws<PositionShouldBeAPieceException>(() => board.MakeAMove(new PiecePosition(1, 0), new PiecePosition(1, 1), whitePlayerId));
+        }
+        [Fact]
+        public void MakeAMoveTestShouldThrowExceptionWhenThePieceCantMakeTheMove()
+        {
+            var whitePlayerId = Guid.NewGuid();
+            var blackPlayerId = Guid.NewGuid();
+            var board = GetBoard("K7/1P6/8/8/8/8/8/k7", whitePlayerId, blackPlayerId);
+            Assert.Throws<PieceDoesntHaveThatMoveException>(() => board.MakeAMove(new PiecePosition(0, 0), new PiecePosition(6, 6), whitePlayerId));
+        }
+        [Fact]
+        public void MakeAMoveTestShouldThrowExceptionWhenItsNotThatColorsTurn()
+        {
+            var whitePlayerId = Guid.NewGuid();
+            var blackPlayerId = Guid.NewGuid();
+            var board = GetBoard("K7/8/8/8/8/8/8/k7", whitePlayerId, blackPlayerId);
+            Assert.Throws<WrongTurnException>(() => board.MakeAMove(new PiecePosition(0, 0), new PiecePosition(1,1), blackPlayerId));
+        }
+        [Fact]
+        public void MakeAMoveTestShouldThrowExceptionWhenTryingToMoveOponentPiece()
+        {
+            var whitePlayerId = Guid.NewGuid();
+            var blackPlayerId = Guid.NewGuid();
+            var board = GetBoard("K7/8/8/8/8/8/8/k7", whitePlayerId, blackPlayerId);
+            Assert.Throws<CanNotMoveOponentPiecesException>(() => board.MakeAMove(new PiecePosition(7, 0), new PiecePosition(6, 0), whitePlayerId));
         }
         [Fact]
         public void MakeAMoveTestShouldMakeAMultipleMovesWithoutException()
@@ -91,7 +129,6 @@ namespace ChessTests.Domain
             Assert.NotNull(@event);
             Assert.IsType<AddPieceToBoardDomainEvent>(@event);
             Assert.Equal(piece,((AddPieceToBoardDomainEvent)@event).Piece);
-
         }
         [Fact]
         public void AddPieceShouldThrowAnExeptionWhenThereIsPieceOnTheSquare()
@@ -135,6 +172,30 @@ namespace ChessTests.Domain
             Assert.Throws<NotImplementedException>(()=>board.MakeAMove(new PiecePosition(3, 1), new PiecePosition(2, 2), whitePlayerId));
         }
         [Fact]
+        public void MakeAMoveShouldThrowWhenTheKingIsUnderCheck()
+        {
+            var whitePlayerId = Guid.NewGuid();
+            var blackPlayerId = Guid.NewGuid();
+            var board = GetBoard("K7/P7/2b5/8/8/8/8/k7", whitePlayerId, blackPlayerId);
+
+            Assert.Throws<InvalidMoveWhenCheckedException>(() => board.MakeAMove(new PiecePosition(1, 0), new PiecePosition(2, 0), whitePlayerId));
+        }
+        [Fact]
+        public void MakeAMoveShouldMakeAMoveWhenEscapeingCheck()
+        {
+            var whitePlayerId = Guid.NewGuid();
+            var blackPlayerId = Guid.NewGuid();
+            var board = GetBoard("K7/P7/2b5/8/8/8/8/k7", whitePlayerId, blackPlayerId);
+
+            board.MakeAMove(new PiecePosition(0, 0), new PiecePosition(0, 1), whitePlayerId);
+
+            var @event = board.Events.First();
+
+            Assert.NotNull(@event);
+            Assert.IsType<MakeAMoveBoardDomainEvent>(@event);
+            Assert.Null(((MakeAMoveBoardDomainEvent)@event).TakenPiece);
+        }
+        [Fact]
         public void MakeAMoveShouldPutThePlayerInCheckButNotInMateWithAvelableRookMove()
         {
             var whitePlayerId = Guid.NewGuid();
@@ -164,7 +225,6 @@ namespace ChessTests.Domain
             Assert.IsType<MakeAMoveBoardDomainEvent>(@event);
             Assert.Equal("bishop", ((MakeAMoveBoardDomainEvent)@event).MovedPiece.Name.Name);
             Assert.Null(((MakeAMoveBoardDomainEvent)@event).TakenPiece);
-
         }
     }
 }

@@ -45,10 +45,16 @@ namespace Domain.Entities
             {
                 throw new PositionShouldBeAPieceException(startPosition);
             }
+            if ((piece.Color==PieceColor.White&&!IsWhiteOnTurn)|| (piece.Color == PieceColor.Black && IsWhiteOnTurn))
+            {
+                throw new CanNotMoveOponentPiecesException();
+            }
             if (board[move.Row,move.Col] is not null && board[move.Row, move.Col].Color==piece.Color)
             {
                 throw new TooManyPiecesException(move);
             }
+            
+            
             foreach (var movePatter in piece.Moves)
             {
                 var moves = GetAvelableMovesThatLeadToATarget(piece.Position, board, movePatter.RowChange, movePatter.ColChange, movePatter.IsRepeatable, movePatter.SwapDirections, piece.Color,move);
@@ -66,10 +72,12 @@ namespace Domain.Entities
                     piece.MakeAMove(move);
                     Fen =board;
                     AddEvent(new MakeAMoveBoardDomainEvent(piece,takenPiece, startPosition, move));
+                    ValidateChecks(piece,board);
+                    IsWhiteOnTurn = !IsWhiteOnTurn;
+                    return;
                 }
             }
-            ValidateChecks(piece,board);
-            IsWhiteOnTurn = !IsWhiteOnTurn;
+            throw new PieceDoesntHaveThatMoveException();
         }
         public void AddPiece(Piece piece)
         {
