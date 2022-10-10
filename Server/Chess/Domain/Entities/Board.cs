@@ -20,7 +20,6 @@ namespace Domain.Entities
             WhitePlayerId = whitePlayerId;
             BlackPlayerId = blackPlayerId;
         }
-
         internal Board(Guid Id, List<Piece> pieces, Guid whitePlayerId, Guid blackPlayerId) : base(Id)
         {
             if (pieces.Count() > DomainConstants.DefaultBoardRows * DomainConstants.DefaultBoardCols)
@@ -41,25 +40,12 @@ namespace Domain.Entities
             }
             var board = ConstructBoard();
             var piece = board[startPosition.Row, startPosition.Col];
-            if (piece is null)
-            {
-                throw new PositionShouldBeAPieceException(startPosition);
-            }
-            if ((piece.Color==PieceColor.White&&!IsWhiteOnTurn)|| (piece.Color == PieceColor.Black && IsWhiteOnTurn))
-            {
-                throw new CanNotMoveOponentPiecesException();
-            }
-            if (board[move.Row,move.Col] is not null && board[move.Row, move.Col].Color==piece.Color)
-            {
-                throw new TooManyPiecesException(move);
-            }
-            
-            
+            ValidatePieceMoves(piece,startPosition,move,board);
+
             foreach (var movePatter in piece.Moves)
             {
                 var moves = GetAvelableMovesThatLeadToATarget(piece.Position, board, movePatter.RowChange, movePatter.ColChange, movePatter.IsRepeatable, movePatter.SwapDirections, piece.Color,move);
-                if (moves
-                    .Any(m=>m==move))
+                if (moves.Contains(move))
                 {
                     Piece takenPiece = null;
                     if (board[move.Row, move.Col] is not null)
@@ -90,6 +76,21 @@ namespace Domain.Entities
         }
         public void AddPieces(List<Piece> pieces) 
             => pieces.ForEach(p => AddPiece(p));
+        private void ValidatePieceMoves(Piece piece,PiecePosition startPosition, PiecePosition move, Piece[,]board)
+        {
+            if (piece is null)
+            {
+                throw new PositionShouldBeAPieceException(startPosition);
+            }
+            if ((piece.Color == PieceColor.White && !IsWhiteOnTurn) || (piece.Color == PieceColor.Black && IsWhiteOnTurn))
+            {
+                throw new CanNotMoveOponentPiecesException();
+            }
+            if (board[move.Row, move.Col] is not null && board[move.Row, move.Col].Color == piece.Color)
+            {
+                throw new TooManyPiecesException(move);
+            }
+        }
         private void ValidateChecks(Piece piece,Piece[,] board)
         {
             bool playerInCheck = false;
@@ -100,7 +101,7 @@ namespace Domain.Entities
             foreach (var pieceToCheckForCheck in Pieces)
             {
                 var moves = GetCheckedPositions(pieceToCheckForCheck, board, checkedPositions, pieceToCheckForCheck.Color, pieceToCheckForCheck.Color!=PieceColor.White?whiteKing.Position:blackKing.Position);
-                if (moves.Count()>0)
+                if (moves is not null)
                 {
                     playerInCheck = true;
                     if (pieceToCheckForCheck.Color != piece.Color)
@@ -120,34 +121,49 @@ namespace Domain.Entities
             foreach (var movePatter in piece.Moves)
             {
                 var moves = GetAvelableMovesThatLeadToATarget(piece.Position, board, movePatter.RowChange, movePatter.ColChange, movePatter.IsRepeatable, movePatter.SwapDirections, piece.Color,target);
+                if (piece.Color == color)
+                {
+                    CheckIteratedPositions(checkedPositions, moves);
+                }
                 if (moves.Any(m =>board[m.Row, m.Col]is not null && board[m.Row,m.Col].Name=="king" && board[m.Row, m.Col].Color!=piece.Color))
                 {
-                    if (piece.Color == color)
-                    {
-                        moves.ForEach(m => checkedPositions[m.Row, m.Col] = true);
-                    }
-                    return moves.ToHashSet();
-                }
-                if (piece.Color==color)
-                {
-                    moves.ForEach(m => checkedPositions[m.Row, m.Col] = true);
+                    return moves;
                 }
             }
-            return new HashSet<PiecePosition>();
+            return null;
+        }
+        private void CheckIteratedPositions(bool[,] checkedPositions,HashSet<PiecePosition>moves)
+        {
+            foreach (var iteratedPosition in moves)
+            {
+                checkedPositions[iteratedPosition.Row, iteratedPosition.Col] = true;
+            }
         }
         private bool IsInMate(Piece king,bool[,] checkedPositions, Piece[,]board, List<HashSet<PiecePosition>> listOfMovesThatPutTheEnemyInCheck)
+        {
+            if (EscapeMateWithKingMove(king,checkedPositions,board)|| EscapeMateByBlockingOrTakingAttackingPiece(king,board,listOfMovesThatPutTheEnemyInCheck)) 
+            {
+                return false; 
+            }
+            return true;
+        }
+        private bool EscapeMateWithKingMove(Piece king, bool[,] checkedPositions, Piece[,] board)
         {
             foreach (var movePattern in king.Moves)
             {
                 var moves = GetAvelableMoves(king.Position, board, movePattern.RowChange, movePattern.ColChange, movePattern.IsRepeatable, movePattern.SwapDirections, king.Color);
-                if (moves.Any(m => !checkedPositions[m.Row,m.Col]))
+                if (moves.Any(m => !checkedPositions[m.Row, m.Col]))
                 {
-                    return false;
+                    return true;
                 }
             }
+            return false;
+        }
+        private bool EscapeMateByBlockingOrTakingAttackingPiece(Piece king, Piece[,] board, List<HashSet<PiecePosition>> listOfMovesThatPutTheEnemyInCheck)
+        {
             foreach (var piece in Pieces)
             {
-                if (piece.Color!=king.Color || piece.Name.Name=="king")
+                if (piece.Color != king.Color || piece.Name.Name == "king")
                 {
                     continue;
                 }
@@ -161,16 +177,16 @@ namespace Domain.Entities
                         while (currentCheck.Contains(move))
                         {
                             index++;
-                            if (index>= listOfMovesThatPutTheEnemyInCheck.Count())
+                            if (index >= listOfMovesThatPutTheEnemyInCheck.Count())
                             {
-                                return false;
+                                return true;
                             }
                             currentCheck = listOfMovesThatPutTheEnemyInCheck[index];
                         }
                     }
                 }
             }
-            return true;
+            return false;
         }
         private Piece[,] ConstructBoard()
         {
@@ -185,7 +201,7 @@ namespace Domain.Entities
             }
             return board;
         }
-        private List<PiecePosition> GetAvelableMovesThatLeadToATarget(PiecePosition startPosition,
+        private HashSet<PiecePosition> GetAvelableMovesThatLeadToATarget(PiecePosition startPosition,
             Piece[,] board,
             int rowChange,
             int colChange,
@@ -194,60 +210,50 @@ namespace Domain.Entities
             PieceColor color,
             PiecePosition target)
         {
-            var result = new List<PiecePosition>();
+            var result = new HashSet<PiecePosition>();
             if (IsRepeatable)
             {
-                if (SwapDirections)
-                {
-                    if (AddPositions(startPosition.Row, startPosition.Col, -rowChange, colChange, board, color, target, result))
-                    {
-                        return result;
-                    }
-                    result.Clear();
-                    if (AddPositions(startPosition.Row, startPosition.Col, rowChange, -colChange, board, color, target, result))
-                    {
-                        return result;
-                    }
-                    result.Clear();
-                    if (AddPositions(startPosition.Row, startPosition.Col, -rowChange, -colChange, board, color, target, result))
-                    {
-                        return result;
-                    }
-                    result.Clear();
-                }
-                if (AddPositions(startPosition.Row, startPosition.Col, rowChange, colChange, board, color, target, result))
-                {
-                    return result;
-                }
-                result.Clear();
+                CallPositionAddingFunction(startPosition,board,rowChange,colChange,result,SwapDirections,color,target,AddPositions);
             }
             else
             {
-                if (SwapDirections)
+                CallPositionAddingFunction(startPosition, board, rowChange, colChange, result, SwapDirections, color, target, AddPosition);
+            }
+            return result;
+        }
+        private void CallPositionAddingFunction(PiecePosition startPosition,
+            Piece[,] board,
+            int rowChange,
+            int colChange,
+            HashSet<PiecePosition>result,
+            bool SwapDirections,
+            PieceColor color,
+            PiecePosition target,
+            Func<PiecePosition , int , int , Piece[,] , PieceColor , PiecePosition , HashSet<PiecePosition>,bool>addingFunction)
+        {
+            if (SwapDirections)
+            {
+                if (addingFunction(startPosition, -rowChange, colChange, board, color, target, result))
                 {
-                    if (AddPosition(startPosition, -rowChange, colChange, board, color, target, result))
-                    {
-                        return result;
-                    }
-                    result.Clear();
-                    if (AddPosition(startPosition, rowChange, -colChange, board, color, target, result))
-                    {
-                        return result;
-                    }
-                    result.Clear();
-                    if (AddPosition(startPosition, -rowChange, -colChange, board, color, target, result))
-                    {
-                        return result;
-                    }
-                    result.Clear();
+                    return;
                 }
-                if (AddPosition(startPosition, rowChange, colChange, board, color, target, result))
+                result.Clear();
+                if (addingFunction(startPosition, rowChange, -colChange, board, color, target, result))
                 {
-                    return result;
+                    return ;
+                }
+                result.Clear();
+                if (addingFunction(startPosition, -rowChange, -colChange, board, color, target, result))
+                {
+                    return ;
                 }
                 result.Clear();
             }
-            return result;
+            if (addingFunction(startPosition, rowChange, colChange, board, color, target, result))
+            {
+                return ;
+            }
+            result.Clear();
         }
         private List<PiecePosition> GetAvelableMoves(PiecePosition startPosition,
             Piece[,] board,
@@ -262,11 +268,11 @@ namespace Domain.Entities
             {
                 if (SwapDirections)
                 {
-                    AddPositions(startPosition.Row, startPosition.Col, -rowChange, colChange, board, color, null, result);
-                    AddPositions(startPosition.Row, startPosition.Col, rowChange, -colChange, board, color, null, result);
-                    AddPositions(startPosition.Row, startPosition.Col, -rowChange, -colChange, board, color, null, result);
+                    AddPositions(startPosition, -rowChange, colChange, board, color, null, result);
+                    AddPositions(startPosition, rowChange, -colChange, board, color, null, result);
+                    AddPositions(startPosition, -rowChange, -colChange, board, color, null, result);
                 }
-                AddPositions(startPosition.Row, startPosition.Col, rowChange, colChange, board, color, null, result);
+                AddPositions(startPosition, rowChange, colChange, board, color, null, result);
             }
             else
             {
@@ -280,7 +286,7 @@ namespace Domain.Entities
             }
             return result;
         }
-        private bool AddPosition(PiecePosition startPosition, int rowChange, int colChange, Piece[,] board, PieceColor color,PiecePosition target, List<PiecePosition>result)
+        private bool AddPosition(PiecePosition startPosition, int rowChange, int colChange, Piece[,] board, PieceColor color,PiecePosition target, ICollection<PiecePosition>result)
         {
             int currentRow = startPosition.Row + rowChange;
             int currentCol = startPosition.Col + colChange;
@@ -296,11 +302,10 @@ namespace Domain.Entities
             }
             return false;
         }
-        private bool AddPositions(int currentRow, int currentCol, int rowChange, int colChange, Piece[,] board, PieceColor color,PiecePosition target, List<PiecePosition>result)
+        private bool AddPositions(PiecePosition startPosition, int rowChange, int colChange, Piece[,] board, PieceColor color,PiecePosition target, ICollection<PiecePosition>result)
         {
-            
-            currentRow += rowChange;
-            currentCol += colChange;
+            int currentRow = startPosition.Row + rowChange;
+            int currentCol = startPosition.Col + colChange;
             while (currentRow < DomainConstants.DefaultBoardRows && currentCol < DomainConstants.DefaultBoardCols && currentRow >=0 && currentCol >= 0)
             {
                 

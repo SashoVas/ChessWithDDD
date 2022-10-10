@@ -9,7 +9,7 @@ namespace Domain.Entities
         public PieceName Name { get;private set; }
         public PiecePosition Position { get;private set; }
         public PieceColor Color { get; private init; }
-        public bool IsTaken { get; set; }
+        public bool IsTaken { get; private set; }
         public List<PieceMovePattern> Moves { get; private init; }
         public Piece(Guid Id, PieceName name, PiecePosition position,PieceColor color, params PieceMovePattern[] moves) : base(Id)
         {
@@ -23,13 +23,7 @@ namespace Domain.Entities
             Moves = moves.ToList();
             IsTaken = false;
         }
-        internal void MakeAMove(PiecePosition move)
-        {
-            Position = move;
-        }
-        internal void TakePiece()
-        {
-            IsTaken = true;
-        }
+        internal void MakeAMove(PiecePosition move) => Position = move;
+        internal void TakePiece() => IsTaken = true;
     }
 }
