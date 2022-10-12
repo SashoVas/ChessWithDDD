@@ -30,22 +30,22 @@ namespace Domain.Policies
                     var position = new PiecePosition(i, col);
                     switch (letter.ToString().ToLower())
                     {
-                        case "k":
+                        case DomainConstants.KingIdentifier:
                             pieces.Add(pieceFactory.CreateKing(position, color));
                             break;
-                        case "q":
+                        case DomainConstants.QueenIdentifier:
                             pieces.Add(pieceFactory.CreateQueen(position, color));
                             break;
-                        case "b":
+                        case DomainConstants.BishopIdentifier:
                             pieces.Add(pieceFactory.CreateBishop(position, color));
                             break;
-                        case "r":
+                        case DomainConstants.RookIdentifier:
                             pieces.Add(pieceFactory.CreateRook(position, color));
                             break;
-                        case "p":
+                        case DomainConstants.PawnIdentifier:
                             pieces.Add(pieceFactory.CreatePawn(position, color));
                             break;
-                        case "n":
+                        case DomainConstants.KnightIdentifier:
                             pieces.Add(pieceFactory.CreateKnight(position, color));
                             break;
                         default:

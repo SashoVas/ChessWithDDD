@@ -26,6 +26,14 @@ namespace Domain.Entities
             {
                 throw new TooManyPiecesException(null);
             }
+            if (whitePlayerId == Guid.Empty)
+            {
+                throw new InvalidPlayerIdException(whitePlayerId);
+            }
+            if (blackPlayerId==Guid.Empty)
+            {
+                throw new InvalidPlayerIdException(blackPlayerId);
+            }
             Pieces = pieces;
             Fen = ConstructBoard();
             IsWhiteOnTurn = true;
@@ -96,8 +104,8 @@ namespace Domain.Entities
             bool playerInCheck = false;
             bool[,] checkedPositions = new bool[DomainConstants.DefaultBoardRows, DomainConstants.DefaultBoardCols];
             var listOfMovesThatPutTheEnemyInCheck = new List<HashSet<PiecePosition>>();
-            Piece whiteKing = Pieces.First(p=>p.Name=="king"&&p.Color==PieceColor.White);
-            Piece blackKing = Pieces.First(p=>p.Name=="king"&&p.Color==PieceColor.Black);
+            Piece whiteKing = Pieces.First(p => p.Name == DomainConstants.KingName && p.Color == PieceColor.White);
+            Piece blackKing = Pieces.First(p=>p.Name== DomainConstants.KingName && p.Color==PieceColor.Black);
             foreach (var pieceToCheckForCheck in Pieces)
             {
                 var moves = GetCheckedPositions(pieceToCheckForCheck, board, checkedPositions, pieceToCheckForCheck.Color, pieceToCheckForCheck.Color!=PieceColor.White?whiteKing.Position:blackKing.Position);
@@ -125,7 +133,7 @@ namespace Domain.Entities
                 {
                     CheckIteratedPositions(checkedPositions, moves);
                 }
-                if (moves.Any(m =>board[m.Row, m.Col]is not null && board[m.Row,m.Col].Name=="king" && board[m.Row, m.Col].Color!=piece.Color))
+                if (moves.Any(m =>board[m.Row, m.Col]is not null && board[m.Row,m.Col].Name== DomainConstants.KingName && board[m.Row, m.Col].Color!=piece.Color))
                 {
                     return moves;
                 }
@@ -163,7 +171,7 @@ namespace Domain.Entities
         {
             foreach (var piece in Pieces)
             {
-                if (piece.Color != king.Color || piece.Name.Name == "king")
+                if (piece.Color != king.Color || piece.Name.Name == DomainConstants.KingName)
                 {
                     continue;
                 }
