@@ -123,7 +123,7 @@ namespace ChessTests.Domain
             var blackPlayerId = Guid.NewGuid();
             var board = GetBoard("K7/1p6/8/8/8/8/8/k7", whitePlayerId, blackPlayerId);
             var piece = pieceFactory.CreateKnight(new PiecePosition(5, 5), PieceColor.White);
-            board.AddPiece(piece);
+            board.AddPiece(piece,whitePlayerId);
 
             var @event = board.Events.First();
             Assert.NotNull(@event);
@@ -138,7 +138,7 @@ namespace ChessTests.Domain
             var board = GetBoard("K7/1p6/8/8/8/8/8/k7", whitePlayerId, blackPlayerId);
             var piece = pieceFactory.CreateKnight(new PiecePosition(1, 1), PieceColor.White);
             
-            Assert.Throws<TooManyPiecesException>(()=>board.AddPiece(piece));
+            Assert.Throws<TooManyPiecesException>(()=>board.AddPiece(piece,whitePlayerId));
         }
         [Fact]
         public void AddPiecesShouldAddMultiplePiecesToTheBoard()
@@ -151,7 +151,7 @@ namespace ChessTests.Domain
             var piece3 = pieceFactory.CreateKnight(new PiecePosition(4, 4), PieceColor.White);
             var piece4 = pieceFactory.CreateKnight(new PiecePosition(5, 5), PieceColor.White);
             var list = new List<Piece> { piece1, piece2, piece3, piece4 };
-            board.AddPieces(list);
+            board.AddPieces(list,whitePlayerId);
 
             Assert.Equal(4,board.Events.Count());
             int el = 0;
@@ -161,6 +161,30 @@ namespace ChessTests.Domain
                 Assert.Equal(list[el], ((AddPieceToBoardDomainEvent)e).Piece);
                 el++;
             }
+        }
+        [Fact]
+        public void AddPieceShouldThrowExceptionWhenAddingPieceThatIsNotYourColor()
+        {
+            var whitePlayerId = Guid.NewGuid();
+            var blackPlayerId = Guid.NewGuid();
+            var board = GetBoard("K7/1p6/8/8/8/8/8/k7", whitePlayerId, blackPlayerId);
+            var piece = pieceFactory.CreateKnight(new PiecePosition(5, 5), PieceColor.White);
+
+            Assert.Throws<ForbiddenPiceAddingException>(()=>board.AddPiece(piece, blackPlayerId));            
+        }
+        [Fact]
+        public void AddPiecesShouldThrowExceptionWhenAddingPieceThatIsNotYourColor()
+        {
+            var whitePlayerId = Guid.NewGuid();
+            var blackPlayerId = Guid.NewGuid();
+            var board = GetBoard("K7/1p6/8/8/8/8/8/k7", whitePlayerId, blackPlayerId);
+            var piece1 = pieceFactory.CreateKnight(new PiecePosition(2, 2), PieceColor.White);
+            var piece2 = pieceFactory.CreateKnight(new PiecePosition(3, 3), PieceColor.White);
+            var piece3 = pieceFactory.CreateKnight(new PiecePosition(4, 4), PieceColor.White);
+            var piece4 = pieceFactory.CreateKnight(new PiecePosition(5, 5), PieceColor.Black);
+            var list = new List<Piece> { piece1, piece2, piece3, piece4 };
+            
+            Assert.Throws < ForbiddenPiceAddingException >(()=>board.AddPieces(list, whitePlayerId));
         }
         [Fact]
         public void MakeAMoveShouldThrowCheckMateException()

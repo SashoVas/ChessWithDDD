@@ -1,6 +1,6 @@
-﻿using MediatR;
+﻿using Application.Abstractions;
 
 namespace Application.Commands
 {
-    public sealed record CreateStandardBoardCommand(Guid WhitePlayerId,Guid BlackPlayerId):IRequest;
+    public sealed record CreateStandardBoardCommand(Guid WhitePlayerId,Guid BlackPlayerId): ICommand;
 }

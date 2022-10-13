@@ -14,6 +14,14 @@ namespace Domain.Entities
         public bool IsWhiteOnTurn { get; private set; }
         internal Board(Guid Id,Guid whitePlayerId,Guid blackPlayerId):base(Id)
         {
+            if (whitePlayerId == Guid.Empty)
+            {
+                throw new InvalidPlayerIdException(whitePlayerId);
+            }
+            if (blackPlayerId == Guid.Empty)
+            {
+                throw new InvalidPlayerIdException(blackPlayerId);
+            }
             Pieces = new List<Piece>();
             Fen = DomainConstants.EmptyBoardFen;
             IsWhiteOnTurn = true;
@@ -42,6 +50,10 @@ namespace Domain.Entities
         }
         public void MakeAMove(PiecePosition startPosition,PiecePosition move,Guid playerId)
         {
+            if (playerId ==Guid.Empty)
+            {
+                throw new InvalidPlayerIdException(playerId);
+            }
             if ((IsWhiteOnTurn &&WhitePlayerId!=playerId)||(!IsWhiteOnTurn && BlackPlayerId!=playerId))
             {
                 throw new WrongTurnException();
@@ -73,8 +85,20 @@ namespace Domain.Entities
             }
             throw new PieceDoesntHaveThatMoveException();
         }
-        public void AddPiece(Piece piece)
+        public void AddPiece(Piece piece,Guid playerId)
         {
+            if (playerId == Guid.Empty)
+            {
+                throw new InvalidPlayerIdException(playerId);
+            }
+            if (piece.Color==PieceColor.White && WhitePlayerId!=playerId)
+            {
+                throw new ForbiddenPiceAddingException(playerId,piece);
+            }
+            if (piece.Color == PieceColor.Black && BlackPlayerId != playerId)
+            {
+                throw new ForbiddenPiceAddingException(playerId, piece);
+            }
             if (Pieces.Any(p=>p.Position==piece.Position))
             {
                 throw new TooManyPiecesException(piece.Position);
@@ -82,8 +106,8 @@ namespace Domain.Entities
             Pieces.Add(piece);
             AddEvent(new AddPieceToBoardDomainEvent(piece));
         }
-        public void AddPieces(List<Piece> pieces) 
-            => pieces.ForEach(p => AddPiece(p));
+        public void AddPieces(List<Piece> pieces,Guid playerId) 
+            => pieces.ForEach(p => AddPiece(p,playerId));
         private void ValidatePieceMoves(Piece piece,PiecePosition startPosition, PiecePosition move, Piece[,]board)
         {
             if (piece is null)

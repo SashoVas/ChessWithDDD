@@ -1,10 +1,11 @@
-﻿using Domain.Factories;
+﻿using Application.Abstractions;
+using Domain.Factories;
 using Domain.Repositories;
 using MediatR;
 
 namespace Application.Commands.Handlers
 {
-    internal sealed class CreateStandardBoardCommandHandler:IRequestHandler<CreateStandardBoardCommand>
+    internal sealed class CreateStandardBoardCommandHandler: ICommandHandler<CreateStandardBoardCommand>
     {
         private readonly IChessRepository repo;
         private readonly IBoardFactory factory;
