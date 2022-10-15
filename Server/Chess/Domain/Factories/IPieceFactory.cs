@@ -11,6 +11,6 @@ namespace Domain.Factories
         public Piece CreateRook(PiecePosition position, PieceColor color);
         public Piece CreateKnight(PiecePosition position, PieceColor color);
         public Piece CreateBishop(PiecePosition position, PieceColor color);
-        public Piece CreateCustom(PiecePosition position, PieceColor color);
+        public Piece CreateCustom(PiecePosition position, PieceColor color,PieceName pieceName,params PieceMovePattern[]pieceMoves);
     }
 }

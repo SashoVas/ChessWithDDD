@@ -131,6 +131,23 @@ namespace ChessTests.Domain
             Assert.Equal(piece,((AddPieceToBoardDomainEvent)@event).Piece);
         }
         [Fact]
+        public void AddCustomPieceShouldAddPieceToTheBoard()
+        {
+            var whitePlayerId = Guid.NewGuid();
+            var blackPlayerId = Guid.NewGuid();
+            var board = GetBoard("K7/1p6/8/8/8/8/8/k7", whitePlayerId, blackPlayerId);
+            var piece = pieceFactory.CreateCustom(
+                new PiecePosition(5, 5),
+                PieceColor.White,new PieceName("test",PieceColor.White),
+                new PieceMovePattern(true,true,0,1,PieceColor.White));
+            board.AddPiece(piece, whitePlayerId);
+
+            var @event = board.Events.First();
+            Assert.NotNull(@event);
+            Assert.IsType<AddPieceToBoardDomainEvent>(@event);
+            Assert.Equal(piece, ((AddPieceToBoardDomainEvent)@event).Piece);
+        }
+        [Fact]
         public void AddPieceShouldThrowAnExeptionWhenThereIsPieceOnTheSquare()
         {
             var whitePlayerId = Guid.NewGuid();

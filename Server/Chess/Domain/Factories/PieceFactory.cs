@@ -6,10 +6,8 @@ namespace Domain.Factories
 {
     public class PieceFactory : IPieceFactory
     {
-        public Piece CreateCustom(PiecePosition position, PieceColor color)
-        {
-            throw new NotImplementedException();
-        }
+        public Piece CreateCustom(PiecePosition position, PieceColor color, PieceName pieceName, params PieceMovePattern[] pieceMoves) 
+            => new Piece(Guid.NewGuid(), pieceName, position, color, pieceMoves);
 
         Piece IPieceFactory.CreateBishop(PiecePosition position, PieceColor color)
         {
