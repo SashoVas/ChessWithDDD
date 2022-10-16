@@ -1,4 +1,4 @@
-﻿using Application.Abstractions;
+﻿using Application.Abstractions.Commands;
 using Domain.Repositories;
 using Domain.ValueObjects;
 using MediatR;
