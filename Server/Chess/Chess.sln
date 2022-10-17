@@ -9,7 +9,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Shared", "Shared\Shared.csp
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ChessTests", "ChessTests\ChessTests.csproj", "{129005EE-7978-47D5-BCE4-4F001A8AA918}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Application", "Application\Application.csproj", "{57431E02-B070-450E-B93D-E911337F6EF6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Application", "Application\Application.csproj", "{57431E02-B070-450E-B93D-E911337F6EF6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Infrastructure", "Infrastructure\Infrastructure.csproj", "{7187F069-50E7-4C8A-B490-5F489B08C974}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +35,10 @@ Global
 		{57431E02-B070-450E-B93D-E911337F6EF6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{57431E02-B070-450E-B93D-E911337F6EF6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{57431E02-B070-450E-B93D-E911337F6EF6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7187F069-50E7-4C8A-B490-5F489B08C974}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7187F069-50E7-4C8A-B490-5F489B08C974}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7187F069-50E7-4C8A-B490-5F489B08C974}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7187F069-50E7-4C8A-B490-5F489B08C974}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
