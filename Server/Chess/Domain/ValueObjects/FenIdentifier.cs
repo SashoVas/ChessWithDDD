@@ -6,13 +6,17 @@ namespace Domain.ValueObjects
     public record FenIdentifier
     {
         public string[] Rows { get; set; }
-        public FenIdentifier(string[]rows)
+        internal FenIdentifier(string[]rows)
         {
             if (rows.Length!=8)
             {
                 throw new InvalidLengthForAFenException();
             }
             Rows=rows;
+        }
+        public static FenIdentifier Create(string fen)
+        {
+            return new(fen.Split('/'));
         }
         public static implicit operator string(FenIdentifier fen)
             =>string.Join('/',fen.Rows);
@@ -44,6 +48,10 @@ namespace Domain.ValueObjects
                 }
             }
             return new FenIdentifier(rows);
+        }
+        public override string ToString()
+        {
+            return string.Join('/',Rows);
         }
     }
 }

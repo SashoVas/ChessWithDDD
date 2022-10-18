@@ -8,7 +8,7 @@ namespace Infrastructure.Data.Config
     {
         public void Configure(EntityTypeBuilder<BoardReadModel> builder)
         {
-            builder.ToTable("BoardReadModel");
+            builder.ToTable("Board");
         }
 
         public void Configure(EntityTypeBuilder<PieceReadModel> builder)

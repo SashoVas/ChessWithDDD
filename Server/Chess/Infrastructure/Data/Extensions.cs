@@ -7,11 +7,11 @@ namespace Infrastructure.Data
 {
     internal static class Extensions
     {
-        public static IServiceCollection AddPostgres(this IServiceCollection services, IConfiguration configuration)
+        public static IServiceCollection AddContexts(this IServiceCollection services, IConfiguration configuration)
         {
 
             services.AddDbContext<ReadDbContext>(options => options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
-
+            services.AddDbContext<WriteDbContext>(options => options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
 
             return services;
         }
