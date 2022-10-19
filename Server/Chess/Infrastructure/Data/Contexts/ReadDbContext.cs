@@ -7,6 +7,8 @@ namespace Infrastructure.Data.Contexts
     internal class ReadDbContext : DbContext
     {
         public DbSet<BoardReadModel> Board { get; set; }
+        public DbSet<PieceReadModel> Pieces { get; set; }
+        public DbSet<PieceMovePatternReadModel> Moves { get; set; }
         public ReadDbContext(DbContextOptions options) : base(options)
         {
         }
@@ -14,10 +16,22 @@ namespace Infrastructure.Data.Contexts
         {
             base.OnModelCreating(builder);
 
-            var readModelConfig = new ReadConfiguration();
-            builder.ApplyConfiguration<BoardReadModel>(readModelConfig);
-            builder.ApplyConfiguration<PieceReadModel>(readModelConfig);
-            builder.ApplyConfiguration<PieceMovePatternReadModel>(readModelConfig);
+            builder.Entity<BoardReadModel>()
+                .HasMany(b => b.Pieces)
+                .WithOne(p => p.Board)
+                .HasForeignKey(p => p.BoardId);
+
+            builder.Entity<PieceMovePatternReadModel>()
+                .HasOne(pm => pm.Piece)
+                .WithMany(p => p.Moves)
+                .HasForeignKey(pm => pm.PieceId);
+
+
+            //builder.HasDefaultSchema("chess");
+            //var readModelConfig = new ReadConfiguration();
+            //builder.ApplyConfiguration<BoardReadModel>(readModelConfig);
+            //builder.ApplyConfiguration<PieceReadModel>(readModelConfig);
+            //builder.ApplyConfiguration<PieceMovePatternReadModel>(readModelConfig);
         }
     }
 }

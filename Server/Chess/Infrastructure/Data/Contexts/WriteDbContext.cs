@@ -1,4 +1,6 @@
 ﻿using Domain.Entities;
+using Domain.ValueObjects;
+using Infrastructure.Data.Config;
 using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Data.Contexts
@@ -12,6 +14,11 @@ namespace Infrastructure.Data.Contexts
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
+            var writeConfig = new WriteConfiguration();
+            builder.ApplyConfiguration<Board>(writeConfig);
+            builder.ApplyConfiguration<Piece>(writeConfig);
+            builder.ApplyConfiguration<PieceMovePattern>(writeConfig);
+            //builder.HasDefaultSchema("chess");
         }
     }
 }

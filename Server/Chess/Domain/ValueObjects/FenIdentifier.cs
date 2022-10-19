@@ -6,6 +6,10 @@ namespace Domain.ValueObjects
     public record FenIdentifier
     {
         public string[] Rows { get; set; }
+        private FenIdentifier()
+        {
+
+        }
         internal FenIdentifier(string[]rows)
         {
             if (rows.Length!=8)

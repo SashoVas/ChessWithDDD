@@ -4,7 +4,10 @@
     {
         public string Name { get; }
         public string Identifier { get; }
+        private PieceName()
+        {
 
+        }
         public PieceName(string name,PieceColor pieceColor,string identifier=null)
         {
             if (name == null)

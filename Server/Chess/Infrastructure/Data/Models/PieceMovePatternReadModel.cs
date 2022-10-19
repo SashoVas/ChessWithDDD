@@ -7,7 +7,7 @@
         public bool SwapDirections { get; set; }
         public int RowChange { get; set; }
         public int ColChange { get; set; }
-        public Guid PieceReadModelId { get; set; }
+        public Guid PieceId { get; set; }
         public PieceReadModel Piece { get; set; }
     }
 }

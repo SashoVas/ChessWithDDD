@@ -8,6 +8,10 @@ namespace Domain.ValueObjects
         public bool SwapDirections { get; init; }
         public int RowChange { get; }
         public int ColChange { get; }
+        private PieceMovePattern()
+        {
+
+        }
         public PieceMovePattern(bool isRepeatable, bool swapDirections, int rowChange, int colChange,PieceColor pieceColor)
         {
             if (rowChange >= 8||colChange>=6)

@@ -11,6 +11,10 @@ namespace Domain.Entities
         public PieceColor Color { get; private init; }
         public bool IsTaken { get; private set; }
         public List<PieceMovePattern> Moves { get; private init; }
+        private Piece():base(Guid.NewGuid())
+        {
+
+        }
         public Piece(Guid Id, PieceName name, PiecePosition position,PieceColor color, params PieceMovePattern[] moves) : base(Id)
         {
             if (moves.Length==0)
