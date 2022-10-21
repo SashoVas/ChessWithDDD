@@ -14,9 +14,10 @@ namespace Infrastructure.Repositories
             this.dbContext = dbContext;
         }
 
-        public Task AddAsync(Board board)
+        public async Task AddAsync(Board board)
         {
-            throw new NotImplementedException();
+            await dbContext.AddAsync(board);
+            await dbContext.SaveChangesAsync();
         }
 
         public Task DeleteAsync(Board board)
@@ -26,7 +27,7 @@ namespace Infrastructure.Repositories
 
         public async Task<Board> GetBoard(Guid id)
         {
-            var board = await dbContext.Board.FirstOrDefaultAsync();
+            var board = await dbContext.Boards.FirstOrDefaultAsync();
             return board;
         }
 

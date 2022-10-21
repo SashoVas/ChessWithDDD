@@ -9,7 +9,7 @@ namespace Infrastructure.Services
     {
         public static IServiceCollection AddServices(this IServiceCollection services)
         {
-            //services.AddTransient<IBoardService, BoardService>();
+            services.AddTransient<IBoardService, BoardService>();
             services.AddTransient<IChessRepository, ChessRepository>();
             return services;
         }

@@ -16,7 +16,7 @@ namespace Infrastructure.Services
 
         public async Task<BoardDTO> GetBoard(Guid Id)
         {
-            var board =await dbContext.Board.ToListAsync();
+            var board =await dbContext.Boards.ToListAsync();
             return new BoardDTO();
         }
     }

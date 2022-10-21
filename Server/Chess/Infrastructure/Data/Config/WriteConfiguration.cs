@@ -2,7 +2,6 @@
 using Domain.ValueObjects;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Infrastructure.Data.Config
 {
@@ -21,7 +20,7 @@ namespace Infrastructure.Data.Config
             builder.Property(b => b.BlackPlayerId);
             builder.Property(b => b.IsWhiteOnTurn);
 
-            builder.ToTable("Board");
+            builder.ToTable("Boards");
         }
         public void Configure(EntityTypeBuilder<Piece> builder)
         {
@@ -47,19 +46,19 @@ namespace Infrastructure.Data.Config
             builder.Property<Guid>("BoardId");
             builder.HasMany(p => p.Moves);
 
-            builder.ToTable("Piece");
+            builder.ToTable("Pieces");
         }
         public void Configure(EntityTypeBuilder<PieceMovePattern> builder)
         {
             builder.Property<Guid>("Id");
             //builder.HasKey("Id");
-            builder.Property<Guid>("PieceReadModelId");
+            builder.Property<Guid>("PieceId");
             builder.Property(p => p.IsRepeatable);
             builder.Property(p => p.SwapDirections);
             builder.Property(p => p.ColChange);
             builder.Property(p => p.RowChange);
 
-            builder.ToTable("PieceReadModel");
+            builder.ToTable("Moves");
         }        
     }
 }

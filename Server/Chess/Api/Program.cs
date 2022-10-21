@@ -1,5 +1,8 @@
+using Application;
 using Infrastructure.Data;
 using Infrastructure.Services;
+using MediatR;
+using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,6 +14,8 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddContexts(builder.Configuration);
 builder.Services.AddServices();
+builder.Services.AddMediatR(typeof(ApplicationMediatREntrypoint).Assembly);
+builder.Services.AddCommandsAndQueries();
 var app = builder.Build();
 using (var serviceScope = app.Services.CreateScope())
 {

@@ -7,8 +7,8 @@ namespace Infrastructure.Data.Contexts
 {
     internal class WriteDbContext : DbContext
     {
-        public DbSet<Board> Board { get; set; }
-        public WriteDbContext(DbContextOptions options) : base(options)
+        public DbSet<Board> Boards { get; set; }
+        public WriteDbContext(DbContextOptions<WriteDbContext> options) : base(options)
         {
         }
         protected override void OnModelCreating(ModelBuilder builder)
@@ -18,7 +18,6 @@ namespace Infrastructure.Data.Contexts
             builder.ApplyConfiguration<Board>(writeConfig);
             builder.ApplyConfiguration<Piece>(writeConfig);
             builder.ApplyConfiguration<PieceMovePattern>(writeConfig);
-            //builder.HasDefaultSchema("chess");
         }
     }
 }
