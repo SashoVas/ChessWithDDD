@@ -9,8 +9,6 @@ namespace Infrastructure.Data.Config
     {
         public void Configure(EntityTypeBuilder<Board> builder)
         {
-            //var fenConverter = new ValueConverter<FenIdentifier,string>(l=>l.ToString(),l=>FenIdentifier.Create(l));
-
             builder.Property(b => b.Fen)
                 .HasConversion(f=>f.ToString(),f=>FenIdentifier.Create(f))
                 .HasColumnName("Fen");
@@ -25,16 +23,12 @@ namespace Infrastructure.Data.Config
         public void Configure(EntityTypeBuilder<Piece> builder)
         {
             builder.Property(p => p.Id);
-            //builder.Property(p=>p.Position.Row);
-            //builder.Property(p=>p.Position.Col);
             builder.OwnsOne(p => p.Position, position =>
                 {
                     position.Property(r => r.Row).HasColumnName("Row");
                     position.Property(c => c.Col).HasColumnName("Col");
                 }            
             );
-            //builder.Property(p=>p.Name.Name);
-            //builder.Property(p=>p.Name.Identifier);
             builder.OwnsOne(p => p.Name, name =>
                 {
                     name.Property(r => r.Name).HasColumnName("Name");
@@ -45,19 +39,16 @@ namespace Infrastructure.Data.Config
             builder.Property(p=>p.Color);
             builder.Property<Guid>("BoardId");
             builder.HasMany(p => p.Moves);
-
             builder.ToTable("Pieces");
         }
         public void Configure(EntityTypeBuilder<PieceMovePattern> builder)
         {
             builder.Property<Guid>("Id");
-            //builder.HasKey("Id");
             builder.Property<Guid>("PieceId");
             builder.Property(p => p.IsRepeatable);
             builder.Property(p => p.SwapDirections);
             builder.Property(p => p.ColChange);
             builder.Property(p => p.RowChange);
-
             builder.ToTable("Moves");
         }        
     }

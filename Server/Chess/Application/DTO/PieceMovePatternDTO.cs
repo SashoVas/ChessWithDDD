@@ -1,6 +1,6 @@
 ﻿namespace Application.DTO
 {
-    public class PieceMovePattern
+    public class PieceMovePatternDTO
     {
         public bool IsRepeatable { get; set;  }
         public bool SwapDirections { get; set; }

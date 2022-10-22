@@ -7,7 +7,7 @@ namespace Infrastructure.Services
 {
     public static class Extensions
     {
-        public static IServiceCollection AddServices(this IServiceCollection services)
+        public static IServiceCollection AddServicesAndRepositories(this IServiceCollection services)
         {
             services.AddTransient<IBoardService, BoardService>();
             services.AddTransient<IChessRepository, ChessRepository>();

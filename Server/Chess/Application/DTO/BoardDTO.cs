@@ -6,6 +6,6 @@
         public Guid BlackPlayerId { get; set; }
         public string BoardFen { get; set; }
         public bool IsWhiteOnTurn { get; set; }
-        public List<PieceDTO> Pieces { get; set; }
+        public IEnumerable<PieceDTO> Pieces { get; set; }
     }
 }
