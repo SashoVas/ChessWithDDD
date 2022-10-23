@@ -1,3 +1,4 @@
+using Api.Infrastructure;
 using Application;
 using Infrastructure.Data;
 using Infrastructure.Services;
@@ -12,6 +13,8 @@ builder.Services.AddContexts(builder.Configuration);
 builder.Services.AddServicesAndRepositories();
 builder.Services.AddMediatR(typeof(ApplicationMediatREntrypoint).Assembly);
 builder.Services.AddApplicationLayer();
+builder.AddCors();
+builder.AddAuthenticationWithJWT();
 
 var app = builder.Build();
 using (var serviceScope = app.Services.CreateScope())
@@ -25,7 +28,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
+app.UseCors("CorsPolicy");
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
