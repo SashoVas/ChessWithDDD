@@ -1,4 +1,4 @@
-using Api.Infrastructure;
+using Api;
 using Application;
 using Infrastructure.Data;
 using Infrastructure.Services;
