@@ -30,8 +30,13 @@ builder.AddCors();
 builder.AddAuthenticationWithJWT();
 
 var app = builder.Build();
-
-// Configure the HTTP request pipeline.
+using (var serviceScope = app.Services.CreateScope())
+{
+    using (var context = serviceScope.ServiceProvider.GetRequiredService<ChessIdentityDbContext>())
+    {
+        context.Database.EnsureCreated();
+    }
+}// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();

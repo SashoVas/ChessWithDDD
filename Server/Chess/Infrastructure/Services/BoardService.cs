@@ -19,6 +19,7 @@ namespace Infrastructure.Services
             var board = await dbContext.Boards
                 .Include(b=>b.Pieces)
                 .ThenInclude(p=>p.Moves)
+                .AsNoTracking()
                 .FirstOrDefaultAsync(b=>b.Id==id);
             return new BoardDTO {
                 BlackPlayerId=board.BlackPlayerId,

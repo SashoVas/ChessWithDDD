@@ -27,7 +27,11 @@ namespace Infrastructure.Repositories
 
         public async Task<Board> GetBoard(Guid id)
         {
-            var board = await dbContext.Boards.FirstOrDefaultAsync(b=>b.Id==id);
+            var board = await dbContext
+                .Boards
+                .Include(b=>b.Pieces)
+                .ThenInclude(p=>p.Moves)
+                .FirstOrDefaultAsync(b=>b.Id==id);
             return board;
         }
 
