@@ -22,7 +22,6 @@ namespace Api.Controllers
         [HttpGet]
         public async Task<ActionResult> GetBoard(Guid BoardId)
         {
-            var id = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
             var board =await sender.Send(new GetBoardQuery(BoardId, Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier))));
             return Ok(board);
         }

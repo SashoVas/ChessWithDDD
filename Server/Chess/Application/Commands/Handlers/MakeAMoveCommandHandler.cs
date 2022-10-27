@@ -1,4 +1,5 @@
 ﻿using Application.Abstractions.Commands;
+using Application.Exceptions;
 using Domain.Repositories;
 using Domain.ValueObjects;
 using MediatR;
@@ -19,7 +20,7 @@ namespace Application.Commands.Handlers
             var board=await repo.GetBoard(request.BoardId);
             if (board is null)
             {
-                throw new NullReferenceException();
+                throw new TheBoardDoesntExistException(request.BoardId);
             }
             var startPosition = new PiecePosition(request.StartRow,request.StartCol);
             var move = new PiecePosition(request.EndRow,request.EndCol);

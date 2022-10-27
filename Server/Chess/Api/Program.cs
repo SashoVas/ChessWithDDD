@@ -1,7 +1,7 @@
 using Api;
 using Application;
+using Infrastructure;
 using Infrastructure.Data;
-using Infrastructure.Services;
 using MediatR;
 
 var builder = WebApplication.CreateBuilder(args);

@@ -1,9 +1,10 @@
 ﻿using Application.Services;
 using Domain.Repositories;
 using Infrastructure.Repositories;
+using Infrastructure.Services;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Infrastructure.Services
+namespace Infrastructure
 {
     public static class Extensions
     {

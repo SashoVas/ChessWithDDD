@@ -20,9 +20,10 @@ namespace Infrastructure.Repositories
             await dbContext.SaveChangesAsync();
         }
 
-        public Task DeleteAsync(Board board)
+        public async Task DeleteAsync(Board board)
         {
-            throw new NotImplementedException();
+            dbContext.Remove(board);
+            await dbContext.SaveChangesAsync();
         }
 
         public async Task<Board> GetBoard(Guid id)
@@ -35,9 +36,10 @@ namespace Infrastructure.Repositories
             return board;
         }
 
-        public Task UpdateAsync(Board board)
+        public async Task UpdateAsync(Board board)
         {
-            throw new NotImplementedException();
+            dbContext.Update(board);
+            await dbContext.SaveChangesAsync();
         }
     }
 }

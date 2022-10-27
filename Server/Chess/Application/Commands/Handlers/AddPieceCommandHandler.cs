@@ -1,4 +1,5 @@
 ﻿using Application.Abstractions.Commands;
+using Application.Exceptions;
 using Domain.Factories;
 using Domain.Repositories;
 using Domain.ValueObjects;
@@ -23,7 +24,7 @@ namespace Application.Commands.Handlers
 
             if (board is null )
             {
-                throw new NullReferenceException();
+                throw new TheBoardDoesntExistException(request.BoardId);
             }
 
             var color = request.IsWhiteColor ? PieceColor.White : PieceColor.Black;
