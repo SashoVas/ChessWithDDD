@@ -7,7 +7,7 @@ using MediatR;
 
 namespace Application.Commands.Handlers
 {
-    internal class AddPieceCommandHandler : ICommandHandler<AddPieceCommand>
+    public class AddPieceCommandHandler : ICommandHandler<AddPieceCommand>
     {
         private readonly IChessRepository chessRepository;
         private readonly IPieceFactory pieceFactory;

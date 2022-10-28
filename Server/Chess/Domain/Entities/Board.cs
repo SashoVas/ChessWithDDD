@@ -2,14 +2,12 @@
 using Domain.Exceptions;
 using Domain.ValueObjects;
 using Shared.Domain;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Domain.Entities
 {
-    public sealed class Board : AggregateRoot
+    public class Board : AggregateRoot
     {
         public List<Piece> Pieces { get;  }
-        //[NotMapped]
         public FenIdentifier Fen { get; private set; }
         public Guid WhitePlayerId { get; private init; }
         public Guid BlackPlayerId { get; private init; }
@@ -17,6 +15,7 @@ namespace Domain.Entities
         private Board() : base(Guid.NewGuid())
         {
         }
+        
         internal Board(Guid Id,Guid whitePlayerId,Guid blackPlayerId):base(Id)
         {
             if (whitePlayerId == Guid.Empty)
