@@ -1,4 +1,7 @@
-﻿namespace Domain.ValueObjects
+﻿using Domain.Exceptions;
+using Shared.Domain;
+
+namespace Domain.ValueObjects
 {
     public record PieceName
     {
@@ -10,9 +13,9 @@
         }
         public PieceName(string name,PieceColor pieceColor,string identifier=null)
         {
-            if (name == null)
+            if (name == null || name.Length< DomainConstants.MinNameLength|| name.Length>DomainConstants.MaxNameLength)
             {
-                throw new ArgumentNullException("Name should not be null");
+                throw new InvalidPieceNameException(name);
             }
             Name =name;
             if (identifier is null)

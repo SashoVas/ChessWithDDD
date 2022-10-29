@@ -6,6 +6,8 @@
         public const string EmptyBoardFen = "8/8/8/8/8/8/8/8";
         public const int DefaultBoardRows = 8;
         public const int DefaultBoardCols = 8;
+        public const int MinNameLength = 3;
+        public const int MaxNameLength = 1000;
 
         public const string KnightName = "knight";
         public const string BishopName = "bishop";
