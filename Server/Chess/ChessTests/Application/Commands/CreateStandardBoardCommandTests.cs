@@ -8,7 +8,6 @@ using Xunit;
 
 namespace ChessTests.Application.Commands
 {
-    //CreateStandardBoardCommandHandler
     public class CreateStandardBoardCommandTests
     {
         [Fact]

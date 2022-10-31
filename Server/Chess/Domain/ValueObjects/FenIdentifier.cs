@@ -16,10 +16,33 @@ namespace Domain.ValueObjects
             {
                 throw new InvalidLengthForAFenException();
             }
-            Rows=rows;
+            for (int i = 0; i < 8; i++)
+            {
+                int count = 0;
+                foreach (var letter in rows[i])
+                {
+                    if (int.TryParse(letter.ToString(), out int length))
+                    {
+                        count += length;
+                    }
+                    else
+                    {
+                        count++;
+                    }
+                }
+                if (count<8)
+                {
+                    throw new InvalidLengthForAFenException();
+                }
+            }
+            Rows =rows;
         }
         public static FenIdentifier Create(string fen)
         {
+            if (fen is null)
+            {
+                throw new InvalidLengthForAFenException();
+            }
             return new(fen.Split('/'));
         }
         public static implicit operator string(FenIdentifier fen)
