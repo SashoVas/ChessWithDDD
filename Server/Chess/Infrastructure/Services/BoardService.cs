@@ -21,6 +21,12 @@ namespace Infrastructure.Services
                 .ThenInclude(p=>p.Moves)
                 .AsNoTracking()
                 .FirstOrDefaultAsync(b=>b.Id==id);
+
+            if (board is null)
+            {
+                return null;
+            }
+
             return new BoardDTO {
                 BlackPlayerId=board.BlackPlayerId,
                 WhitePlayerId=board.WhitePlayerId,

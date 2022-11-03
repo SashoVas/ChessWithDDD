@@ -1,10 +1,11 @@
 ﻿using Application.Abstractions.Queries;
 using Application.DTO;
+using Application.Exceptions;
 using Application.Services;
 
 namespace Application.Queries.Handlers
 {
-    internal class GetBoardHandler : IQueryHandler<GetBoardQuery, BoardDTO>
+    public class GetBoardHandler : IQueryHandler<GetBoardQuery, BoardDTO>
     {
         private readonly IBoardService boardService;
 
@@ -15,9 +16,14 @@ namespace Application.Queries.Handlers
         {
             var boardDto =await boardService.GetBoard(request.BoardId);
 
+            if (boardDto is null)
+            {
+                throw new TheBoardDoesntExistException(request.BoardId);
+            }
+
             if (boardDto.WhitePlayerId != request.CallerId && boardDto.BlackPlayerId != request.CallerId)
             {
-                throw new InvalidOperationException();
+                throw new NotAuthorizedToSeeTheBoardException();
             }
 
             return boardDto;

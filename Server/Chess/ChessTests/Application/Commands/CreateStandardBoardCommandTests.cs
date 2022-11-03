@@ -15,6 +15,7 @@ namespace ChessTests.Application.Commands
         {
             var repo = new Mock<IChessRepository>();
             var result = new List<Board>();
+
             repo.Setup(r => r.AddAsync(It.IsAny<Board>())).Returns(async(Board board)=>result.Add(board));
             var pieceFactory = new PieceFactory();
             var boardFactory = new BoardFactory(pieceFactory);
