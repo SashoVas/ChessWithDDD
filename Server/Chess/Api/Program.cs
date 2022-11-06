@@ -1,4 +1,5 @@
 using Api;
+using Api.Middlewares;
 using Application;
 using Infrastructure;
 using Infrastructure.Data;
@@ -13,6 +14,7 @@ builder.Services.AddContexts(builder.Configuration);
 builder.Services.AddServicesAndRepositories();
 builder.Services.AddMediatR(typeof(ApplicationMediatREntrypoint).Assembly);
 builder.Services.AddApplicationLayer();
+builder.Services.AddTransient<GlobalExceptionHandlingMiddleware>();
 builder.AddCors();
 builder.AddAuthenticationWithJWT();
 
@@ -31,7 +33,7 @@ app.UseHttpsRedirection();
 app.UseCors("CorsPolicy");
 app.UseAuthentication();
 app.UseAuthorization();
-
+app.UseMiddleware<GlobalExceptionHandlingMiddleware>();
 app.MapControllers();
 
 app.Run();
