@@ -1,28 +1,13 @@
 using Identity;
-using Identity.Data;
-using Identity.Data.Models;
+using Identity.Infrastructure;
 using Identity.Services;
 using Identity.Services.Contracts;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
-var defaultConnection = builder.Configuration.GetSection("ConnectionStrings:DefaultConnection").Value;
-builder.Services.AddDbContext<ChessIdentityDbContext>(options => options.UseSqlServer(defaultConnection));
-builder.Services.AddIdentity<User, IdentityRole>(options => {
-    options.SignIn.RequireConfirmedEmail = false;
-    options.Password.RequireUppercase = false;
-    options.Password.RequireDigit = false;
-    options.Password.RequireNonAlphanumeric = false;
-    options.Password.RequiredLength = 3;
-    options.Password.RequireLowercase = false;
-    options.Password.RequiredUniqueChars = 1;
-})
-.AddEntityFrameworkStores<ChessIdentityDbContext>()
-.AddDefaultTokenProviders();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+builder.Services.AddDB(builder.Configuration);
+builder.Services.AddIdentity();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddTransient<IIdentityService, IdentityService>();
@@ -30,13 +15,7 @@ builder.AddCors();
 builder.AddAuthenticationWithJWT();
 
 var app = builder.Build();
-using (var serviceScope = app.Services.CreateScope())
-{
-    using (var context = serviceScope.ServiceProvider.GetRequiredService<ChessIdentityDbContext>())
-    {
-        context.Database.EnsureCreated();
-    }
-}// Configure the HTTP request pipeline.
+app.Services.EnsureDbsAreCreated();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();

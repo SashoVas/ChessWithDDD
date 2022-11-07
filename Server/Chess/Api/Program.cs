@@ -15,14 +15,12 @@ builder.Services.AddServicesAndRepositories();
 builder.Services.AddMediatR(typeof(ApplicationMediatREntrypoint).Assembly);
 builder.Services.AddApplicationLayer();
 builder.Services.AddTransient<GlobalExceptionHandlingMiddleware>();
+builder.Services.AddLogging();
 builder.AddCors();
 builder.AddAuthenticationWithJWT();
 
 var app = builder.Build();
-using (var serviceScope = app.Services.CreateScope())
-{
-    serviceScope.EnsureDbsAreCreated();
-}
+app.Services.CreateScope().EnsureDbsAreCreated();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
