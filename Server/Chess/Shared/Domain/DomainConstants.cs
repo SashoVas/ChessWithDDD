@@ -22,5 +22,10 @@
         public const string PawnIdentifier = "p";
         public const string KingIdentifier = "k";
         public const string QueenIdentifier = "q";
+
+        public const int MinTurnDurationInMinutes = 1;
+        public const int MaxTurnDurationInMinutes = 90;
+        public const int MinIncrementAmounthInSeconds = 0;
+        public const double MaxIncrementAmounthPercentageFromGameDuration = 0.05;
     }
 }
