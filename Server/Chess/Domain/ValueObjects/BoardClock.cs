@@ -10,6 +10,17 @@ namespace Domain.ValueObjects
         public TimeSpan WhitePlayerDuration { get; set; }
         public TimeSpan BlackPlayerDuration { get; set; }
         public TimeSpan EndTurnTimeIncrement { get; set; }
+        public BoardClock()
+        {
+            StartTime = DateTime.UtcNow;
+            EndTurnTimeIncrement = TimeSpan.Zero;
+            WhitePlayerDuration = new TimeSpan(DomainConstants.DefaultGameDurationHours,
+                DomainConstants.DefaultGameDurationMinutes,
+                DomainConstants.DefaultGameDurationSeconds);
+            BlackPlayerDuration = new TimeSpan(DomainConstants.DefaultGameDurationHours,
+                DomainConstants.DefaultGameDurationMinutes,
+                DomainConstants.DefaultGameDurationSeconds); 
+        }
         public BoardClock(TimeSpan TurnDuration)
         {
             if (TurnDuration.TotalMinutes < DomainConstants.MinTurnDurationInMinutes || TurnDuration.TotalMinutes > DomainConstants.MaxTurnDurationInMinutes)
@@ -59,6 +70,7 @@ namespace Domain.ValueObjects
                 }
                 BlackPlayerDuration += EndTurnTimeIncrement;
             }
+            LastMoveTime=moveTime;
             return true;
         }
     }

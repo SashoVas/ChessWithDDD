@@ -3,6 +3,7 @@ using Domain.Events;
 using Domain.Exceptions;
 using Domain.Factories;
 using Domain.ValueObjects;
+using Shared.Domain;
 using Xunit;
 
 namespace ChessTests.Domain.Entities
@@ -20,7 +21,15 @@ namespace ChessTests.Domain.Entities
 
         private Board GetBoard(string fen, Guid whitePlayerId, Guid blackPlayerId)
         {
-            return boardFactory.CreateCustomStandard(fen, whitePlayerId, blackPlayerId);
+            return boardFactory.CreateCustomStandard(fen,
+                whitePlayerId,
+                blackPlayerId,
+                new TimeSpan(DomainConstants.DefaultGameDurationHours,
+                    DomainConstants.DefaultGameDurationMinutes,
+                    DomainConstants.DefaultGameDurationSeconds),
+                new TimeSpan(DomainConstants.DefaultIncrementTimeHours,
+                    DomainConstants.DefaultIncrementTimeMinutes,
+                    DomainConstants.DefaultIncrementTimeSeconds));
         }
 
         [Fact]

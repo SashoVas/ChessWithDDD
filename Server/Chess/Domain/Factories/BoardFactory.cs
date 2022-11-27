@@ -11,11 +11,12 @@ namespace Domain.Factories
         public BoardFactory(IPieceFactory pieceFactory) 
             => this.pieceFactory = pieceFactory;
 
-        public Board CreateCustomStandard(FenIdentifier fen, Guid whitePlayerId, Guid blackPlayerId)
+        public Board CreateCustomStandard(FenIdentifier fen, Guid whitePlayerId, Guid blackPlayerId,TimeSpan turnDuration,TimeSpan endTurnIncrement)
         {
             var policy = new CustomStandardBoardPolicy();
             var pieces = policy.GenerateItems(pieceFactory, fen);
-            var board = new Board(Guid.NewGuid(),pieces.ToList(),whitePlayerId,blackPlayerId);
+            var boardClock = new BoardClock(turnDuration, endTurnIncrement);
+            var board = new Board(Guid.NewGuid(),pieces.ToList(),whitePlayerId,blackPlayerId, boardClock);
             return board;
         }
 
@@ -23,7 +24,8 @@ namespace Domain.Factories
         {
             var policy = new StandardBoardPolicy();
             var pieces = policy.GenerateItems(pieceFactory, null);
-            var board = new Board(Guid.NewGuid(),pieces.ToList(),whitePlayerId,blackPlayerId);
+            var boardClock = new BoardClock();
+            var board = new Board(Guid.NewGuid(),pieces.ToList(),whitePlayerId,blackPlayerId,boardClock);
             return board;
         }
     }

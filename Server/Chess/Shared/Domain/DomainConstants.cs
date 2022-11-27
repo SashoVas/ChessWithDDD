@@ -27,5 +27,13 @@
         public const int MaxTurnDurationInMinutes = 90;
         public const int MinIncrementAmounthInSeconds = 0;
         public const double MaxIncrementAmounthPercentageFromGameDuration = 0.05;
+
+        public const int DefaultGameDurationMinutes = 30;
+        public const int DefaultGameDurationHours = 0;
+        public const int DefaultGameDurationSeconds = 0;
+
+        public const int DefaultIncrementTimeSeconds=0;
+        public const int DefaultIncrementTimeMinutes = 0;
+        public const int DefaultIncrementTimeHours = 0;
     }
 }

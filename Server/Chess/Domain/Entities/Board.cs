@@ -12,11 +12,12 @@ namespace Domain.Entities
         public Guid WhitePlayerId { get; private init; }
         public Guid BlackPlayerId { get; private init; }
         public bool IsWhiteOnTurn { get; private set; }
+        public BoardClock BoardClock { get; private set; }
         private Board() : base(Guid.NewGuid())
         {
         }
         
-        internal Board(Guid Id,Guid whitePlayerId,Guid blackPlayerId):base(Id)
+        internal Board(Guid Id,Guid whitePlayerId,Guid blackPlayerId, BoardClock boardClock) :base(Id)
         {
             if (whitePlayerId == Guid.Empty)
             {
@@ -31,8 +32,9 @@ namespace Domain.Entities
             IsWhiteOnTurn = true;
             WhitePlayerId = whitePlayerId;
             BlackPlayerId = blackPlayerId;
+            BoardClock = boardClock;
         }
-        internal Board(Guid Id, List<Piece> pieces, Guid whitePlayerId, Guid blackPlayerId) : base(Id)
+        internal Board(Guid Id, List<Piece> pieces, Guid whitePlayerId, Guid blackPlayerId,BoardClock boardClock) : base(Id)
         {
             if (pieces.Count() > DomainConstants.DefaultBoardRows * DomainConstants.DefaultBoardCols)
             {
@@ -51,6 +53,7 @@ namespace Domain.Entities
             IsWhiteOnTurn = true;
             WhitePlayerId = whitePlayerId;
             BlackPlayerId = blackPlayerId;
+            BoardClock = boardClock;
         }
         public void MakeAMove(PiecePosition startPosition,PiecePosition move,Guid playerId)
         {
@@ -84,6 +87,7 @@ namespace Domain.Entities
                     AddEvent(new MakeAMoveBoardDomainEvent(piece,takenPiece, startPosition, move));
                     ValidateChecks(piece,board);
                     IsWhiteOnTurn = !IsWhiteOnTurn;
+                    BoardClock.DecrementTimer(IsWhiteOnTurn?PieceColor.White:PieceColor.Black,DateTime.UtcNow);
                     return;
                 }
             }
